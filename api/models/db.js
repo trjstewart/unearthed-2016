@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-var connection = mongoose.connect('mongodb://10.90.91.220:27017/unearthed');
+mongoose.connect('mongodb://10.90.91.220:27017/unearthed');
 
 //****************************//
 //
@@ -10,12 +10,12 @@ var connection = mongoose.connect('mongodb://10.90.91.220:27017/unearthed');
 
 var drumSchema = new Schema({
   info : {
-    drumId: { type: Number, required: true },
+    drumId: { type: Number, unique : true },
     samples: { type: Array, default: [] },
     trackingData: {
-      location: [String],
-      humidity: [Number],
-      temp: [Number]
+      location: [],
+      humidity: [],
+      temp: []
     },
     time: { type: Date, default: Date.now },
     depth : {
@@ -40,7 +40,7 @@ var Drum = mongoose.model('Drum', drumSchema);
 
 var sampleSchema = new Schema({
   sampleId: { type: Number, required: true },
-  depth: [], // [min, max]
+  depth: [], // [min, max] strings of depth in metres
   timeDug : String,
   borehole : String,
   lab : {
