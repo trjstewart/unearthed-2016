@@ -1,10 +1,6 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-//var autoIncrement = require('mongoose-auto-increment');
-
 var connection = mongoose.connect('mongodb://10.90.91.220:27017/unearthed');
-
-//autoIncrement.initialize(connection);
 
 //****************************//
 //
@@ -21,7 +17,7 @@ var drumSchema = new Schema({
       humidity: [Number],
       temp: [Number]
     },
-    time: String,
+    time: { type: Date, default: Date.now },
     depth : {
       min : Number,
       max : Number

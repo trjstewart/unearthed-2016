@@ -6,65 +6,33 @@ var router = express.Router();
 var Drum = mongoose.model('Drum');
 var Sample = mongoose.model('Sample');
 
+var id = 1;
 
 // GET for fetching next sample id
 router.get('/sample/id', function(req, res, next) {
-
-  //find largest sampleId
-  Sample.find({ sampleId: }
-    .limit(1)
-    .sort({ sampleId: -1 })
-    .select('sampleId')
-    .exec(function(err, sampleId) {
-      if(err) {
-        console.log(err);
-      }
-
-      //if no previous id set
-      if(!sampleId) {
-        return res.json({
-          status: 200,
-          response: {
-            sampleId: 0000
-          }
-        });
-      }
-
-      //previous id found, increment by 1 then send
-      return res.json({
-        status: 200,
-        response: {
-          sampleId: sampleId++
-        }
-      });
-
-    });
-  });
+  var thisId = id.toString();
+  while(thisId.length < 4){
+    thisId = '0' + thisId;
+  }
+  res.json({status : 200, response : {id : thisId}});
+  id++;
 });
 
 
 // GET for fetching sample by id
 router.get('/sample/:id', function(req, res, next) {
-  return res.json({});
-});
-
-
-// POST for creating sample
-router.post('/sample/create', function(req, res) {
-
-  //Create new sample
-  var newSample = new Sample({
-
-  });
-
-  newSample.save(function(err) {
-    if(err) {
-      return res.json({ status: 500 });
+  Drum
+  .find({})
+  .where('info.samples').equals(req.params.id)
+  .exec(function(err, drum) {
+    if(err){
+      
     }
 
-    //Saved sample successfully
-    return res.json({ status: 200 });
+
   });
+
+  return res.json({});
 });
 
 // POST for updating sample
@@ -116,14 +84,45 @@ router.get('/drum/:id', function(req, res) {
 
 // POST for starting drums trip
 router.post('/drum/start/:id', function(req, res, next) {
+  Drum.find({drumId : req.params.id}, function(err, drum){
+    if (err) res.json({status : 500});
 
+    drum.info = {
+      trackingData : {
+        location : [req.body.location], // [latitude, longitude]
+        humidity : [req.body.humidity],
+        temp : [req.body.temp]
+      }
+    };
+
+    drum.save(function(err){
+      if (err) res.json({status: 500});
+      res.json({status : 200, response : {message : "Drum Successfully Started"}});
+    });
+
+
+  });
   return res.json({});
 });
 
 
 // POST for updating drum
 router.post('/drum/update/:id', function(req, res, next) {
+  Drum.find({drumId:req.params.id}, function(err, drum){
 
+    drum.info.trackingData.location.push(req.body.location);
+    drum.info.trackingData.humidity.push(req.body.humidity);
+    drum.info.trackingData.temp.push(req.body.temp);
+
+    drum.save(function(err){
+      if(err) res.json({status:500});
+      res.json({
+        status : 200
+
+      })
+    });
+
+  });
   return res.json({});
 });
 
