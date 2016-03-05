@@ -7,43 +7,48 @@
     <link href="css/style.css" media="all" rel="stylesheet" type="text/css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
     <script type="text/javascript">
-
-        var Sample_Form_Template;
         var APIUrl = "http://ec2-54-206-23-214.ap-southeast-2.compute.amazonaws.com:3000/api/";
 
-        function changePage(page) {
-            $(".page").removeClass("active");
-            $(".page[page_id='"+page+"']").addClass("active");
-        }
-
-        $(document).ready(function() {
-            Sample_Form_Template = $("#Sample_Form_List group").clone();
-            console.log(Sample_Form_Template);
-        });
-
-        function getSampleID(callback){
-            $.ajax({
-                url: APIUrl + "sample/id",
-            }).done(function(url) {
-                if(url.status == 200) {
-                    return callback(url.response);
+        //Longitude and Langitude
+        var LongLat = {
+            generateType: function(Long) {
+                var long = typeof Long !== 'undefined' || false ? 2 : 1;
+                var num = (Math.random() * (90 * long)).toFixed(3);
+                if (Math.floor(Math.random()) == 0) {
+                    num = num * -1; //Gotta get those negative values
                 }
-                return false;
-            });
-        }
+                return num;
+            },
+            generate: function(){
+                return [this.generateType(),this.generateType(true)]
+            }
+        };
 
-        function setMostRecentSampleID() {
-            var data = getSampleID(function(data){
-                if(data !== false){
-                    console.log(data.id)
-                } else {
-                    console.log("Get Sample ID Failed");
-                }
-            });
-           // $("#Sample_Form_List:last-child group input[ajax_name='id']").val(getSampleID().response.id);
-        }
+        //Sample List
+        var SampleList = {
+            Template: "",
+            getId: function(callback){
+                $.ajax({
+                    url: APIUrl + "sample/id",
+                }).done(function(url) {
+                    if(url.status == 200) {
+                        return callback(url.response);
+                    }
+                    return false;
+                });
+            },
+            setMostRecent: function() {
+                this.getId(function(data){
+                    if(data !== false){
+                        $("#Sample_Form_List group:last-child input[ajax_name='id']").val(data.id);
+                        $("#Sample_Form_List group:last-child input[ajax_name='location']").val(LongLat.generate().join(","));
+                    } else {
+                        console.log("Get Sample ID Failed");
+                    }
+                });
+            }
+        };
 
-        //Drum data
         $.fn.serializeObject = function() {
             var o = {};
             var a = this.serializeArray();
@@ -60,6 +65,20 @@
             return o;
         };
 
+
+        function changePage(page) {
+            $(".page").removeClass("active");
+            $(".page[page_id='"+page+"']").addClass("active");
+        }
+
+        $(document).ready(function() {
+            SampleList.Template = $("#Sample_Form_List group").clone();
+            SampleList.setMostRecent();
+            console.log(LongLat.generate());
+        });
+
+        //Drum dat
+
         //return drum data
         $(function() {
             $('form').submit(function() {
@@ -68,15 +87,17 @@
             });
         });
 
-        function addSample(){
-            $("#Sample_Form_List").append($(Sample_Form_Template).clone());
-            console.log(Sample_Form_Template);
+
+        //Interaction Functions
+        function SampleForm_AddSample(){
+            $("#Sample_Form_List").append($(SampleList.Template).clone());
+            SampleList.setMostRecent();
         }
 
-        //get extra info
-        $.getJSON('http://ipinfo.io', function(data){
-            console.log(data);
-        })
+        function SampleForm_RemoveSample(){
+            $("#Sample_Form_List group:last-child").remove();
+        }
+
     </script>
 </head>
 <body>
@@ -155,8 +176,8 @@
                                 </div>
                                 <div class="col-xs-6">
                                     <div class="Sample_Form_Controls">
-                                        <a class="btn btn-success" onclick="addSample()">+</a>
-                                        <a class="btn btn-danger">-</a>
+                                        <a class="btn btn-success" onclick="SampleForm_AddSample()">+</a>
+                                        <a class="btn btn-danger" onclick="SampleForm_RemoveSample()">-</a>
                                     </div>
                                 </div>
                             </div>
