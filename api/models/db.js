@@ -17,7 +17,8 @@ var drumSchema = new Schema({
       humidity: [],
       temp: []
     },
-    time: { type: Date, default: Date.now },
+    startTime: { type: Date, default: Date.now },
+    endTime: { type: Date },
     dispatcher: String
   }
 });

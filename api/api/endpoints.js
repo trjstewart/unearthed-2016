@@ -71,6 +71,10 @@ router.post('/sample/update/:type/:id', function (req, res, next) {
 
                     //update lab stuff
                     case "lab":
+
+                        drum.endTime = Date.now();
+                        EndDrumTrip(drum, function(err){}); //save drum updated end time
+
                         sample.lab = {
                             results: {
                                 coalComp: req.body.coalComp,
@@ -184,6 +188,22 @@ router.post('/drum/update/:id', function (req, res, next) {
     });
     return res.json({});
 });
+
+
+//*********************************//
+//
+//      Helpers
+//
+//******************************//
+
+function EndDrumTrip(drum, callback) {
+  drum.save(function(err) {
+    if(err) {
+      console.log("Da faq m8!");
+    }
+    return callback();
+  });
+}
 
 
 module.exports = router;
