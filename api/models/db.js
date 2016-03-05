@@ -19,8 +19,6 @@ var drumSchema = new Schema({
   analyst : {
 
   }
-
-
   //Temperature data array
   //
 });

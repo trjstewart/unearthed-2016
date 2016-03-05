@@ -5,7 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://10.90.91.220/unearthed');
+mongoose.connect('mongodb://10.90.91.220:27017/unearthed');
 var db = require('./models/db');
 
 var API = require('./api/endpoints');
