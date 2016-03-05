@@ -21,18 +21,31 @@ router.get('/sample/id', function(req, res, next) {
 
 // GET for fetching sample by id
 router.get('/sample/:id', function(req, res, next) {
-  Drum
-  .find({})
-  .where('info.samples').equals(req.params.id)
-  .exec(function(err, drum) {
-    if(err){
-      
+
+  var id = req.params.id;
+
+  Drum.find({ info.samples.sampleId: id }, function(err, drum) {
+
+    if(err) {
+      return res.json({
+        status: 500
+      });
     }
 
+    //Get sample and return it
+    for(var i = 0; i < drum.info.samples.length; i++) {
+      var sample = drum.info.samples[i];
+      if( sample.sampleId === id) {
+
+        return res.json({
+          status: 200,
+          response: sample
+        });
+
+      }
+    }
 
   });
-
-  return res.json({});
 });
 
 // POST for updating sample
