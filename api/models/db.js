@@ -40,8 +40,16 @@ var Drum = mongoose.model('Drum', drumSchema);
 
 var sampleSchema = new Schema({
   sampleId: { type: Number, required: true },
-  lab : {},
-  analyst : {}
+  lab : {
+    results : {
+      coalComp : Number,
+      quality : String,
+      density : String
+    }
+  },
+  analyst : {
+    tests: [String]
+  }
 });
 
 var Sample = mongoose.model('Sample', sampleSchema);
