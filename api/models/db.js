@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-mongoose.connect('mongodb://ec2-54-206-23-214.ap-southeast-2.compute.amazonaws.com:27017/unearthed');
+mongoose.connect('mongodb://localhost:27017/unearthed');
 
 //****************************//
 //
