@@ -113,9 +113,9 @@ body {
     cursor: pointer;
 }
 
-.btn-primary {
-    background: #F12828;
-    border: 1px solid #EA1A1A;
+.btn-primary, .btn-primary:visited {
+    background: #F12828 !important;
+    border: 1px solid #D41A1A !important;
     color: #fff;
     border-radius: 30px;
     padding: 5px 20px;
@@ -124,11 +124,79 @@ body {
 }
 
 .btn-primary:hover {
-    background: #D41A1A;
+    background: #D41A1A !important;
+    border: 1px solid #D41A1A !important;
+}
+
+.btn-primary:active {
+    background: #D41A1A !important;
+    border: 1px solid #DE1919 !important;
 }
 
 .barrel-button {
     margin-top: 12px;
     float: right;
     margin-right: 30px;
+}
+
+#add-barrel {
+    padding: 0 50px;
+}
+
+#add-barrel h4 {
+    font-size: 26px;
+    margin-top: 50px;
+}
+
+#add-barrel label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 12px;
+}
+
+#add-barrel input {
+    border: 1px solid #A33F0D;
+    padding: 10px 15px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+#add-barrel input#submit {
+    display: block;
+    background-color: #1B1464;
+    color: white;
+    text-transform: uppercase;
+    border: none;
+    padding: 20px 10px;
+    width: 100%;
+    font-weight: 600;
+}
+
+#add-barrel input.range {
+    width: 49%;
+    display: inline;
+}
+
+.Sample_Form {
+
+}
+
+.Sample_Form_Controls {
+    float: right;
+}
+
+.Sample_Form_Controls a {
+    padding: 10px;
+    font-weight: bold;
+    line-height: 9px;
+    font-size: 20px;
+    height: 34px;
+}
+
+#Samples_Form > .col-xs-12 > .row {
+    margin-bottom: 20px;
+}
+
+group {
+    display: block;
 }
