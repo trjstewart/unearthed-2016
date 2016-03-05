@@ -24,7 +24,7 @@ router.get('/sample/:id', function(req, res, next) {
 
   var id = req.params.id;
 
-  Drum.find({ info.samples.sampleId: id }, function(err, drum) {
+  Drum.find({ "info.samples.sampleId": id }, function(err, drum) {
 
     if(err) {
       return res.json({
@@ -49,9 +49,58 @@ router.get('/sample/:id', function(req, res, next) {
 });
 
 // POST for updating sample
-router.post('/sample/update/:id', function(req, res, next) {
+router.post('/sample/update/:type/:id', function(req, res, next) {
 
-  return res.json({});
+  var id = req.params.id;
+  Drum.find({ "info.samples.sampleId": id }, function(err, drum) {
+    if(err) {
+      return res.json({ status: 500 });
+    }
+
+    //Get sample and return it
+    var sample;
+    for(var i = 0; i < drum.info.samples.length; i++) {
+      sample = drum.info.samples[i];
+      if( sample.sampleId === id) {
+
+        //update depending on type
+        switch(req.params.type) {
+
+          //update lab stuff
+          case "lab":
+            sample.lab = {
+              results: {
+                coalComp : req.body.coalComp,
+                quality : req.body.quality,
+                density : req.body.density
+              }
+            };
+            break;
+
+          //update analyst stuff
+          case "analyst":
+            sample.analyst = {
+              tests: req.body.tests
+            };
+            break;
+
+          //false call
+          default:
+            return res.json({ status: 404 });
+        }
+        break; //break loop
+      }
+    }
+
+    //Save updated sample
+    sample.save(function(err) {
+      if(err) {
+        return res.json({ status: 500 });
+      }
+      return res.json({ status: 200 });
+    });
+
+  });
 });
 
 router.get('/drum/all', function(req, res, next){
