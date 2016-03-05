@@ -21,9 +21,24 @@ router.get('/sample/:id', function(req, res, next) {
 
 
 // POST for creating sample
-router.post('/sample/create', function(req, res, next) {
+router.post('/sample/create', function(req, res) {
 
-  return res.json({});
+  //Create new sample
+  var newSample = new Sample({
+
+  });
+
+  newSample.save(function(err) {
+    if(err) {
+      return res.json({
+        status: 500,
+        response: {}
+      });
+    }
+
+    //Saved sample successfully
+    return res.json({ status: 200 });
+  });
 });
 
 // POST for updating sample
