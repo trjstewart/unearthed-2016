@@ -128,12 +128,12 @@ router.get('/drum/all', function (req, res, next) {
   var drumList = [];
   Drum.find({}, function (err, drums) {
     if (err) return res.json({status: 500}).end();
-    if (drums.length > 0) {
+    for (var i = 0; i < drums.length; i++) {
+      drumList.push(drums[i].info.drumId);
+    }
+    if (drumList.length > 0) {
       return res.json({status: 200, response: drumList});
     } else {
-      for (var i = 0; i < drums.length; i++) {
-        drumList.push(drums[i].info.drumId);
-      }
       return res.json({status: 404, response: {message: "No Drums Found."}})
     }
   });
