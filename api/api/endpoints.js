@@ -12,8 +12,13 @@ function randomWithRange(min, max) {
   return ((Math.random() * (max - min)) + min).toFixed(2);
 }
 
-// GET for fetching next sample id
-router.get('/sample/id', function (req, res, next) {
+// GET for checking current sample ID
+router.get('/sample/id', function(req, res, next){
+  return res.json({status : 200, response : {id : id}});
+});
+
+// POST for fetching next sample id
+router.post('/sample/id', function (req, res, next) {
   if (id > 9999) {
     id = 1;
   }
