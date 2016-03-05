@@ -7,24 +7,41 @@
     <link href="css/style.css" media="all" rel="stylesheet" type="text/css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
     <script type="text/javascript">
+
+        var Sample_Form_Template;
+        var APIUrl = "http://ec2-54-206-23-214.ap-southeast-2.compute.amazonaws.com:3000/api/";
+
         function changePage(page) {
             $(".page").removeClass("active");
             $(".page[page_id='"+page+"']").addClass("active");
         }
 
         $(document).ready(function() {
-            $('#myForm').ajaxForm(function() {
-
-                //validate - Place holder
-                if (false) {
-
-                } else {
-                    $('#form').html('<p>Sample has been catalogued.</p>');
-                    //form submitted
-                }
-
-            });
+            Sample_Form_Template = $("#Sample_Form_List group").clone();
+            console.log(Sample_Form_Template);
         });
+
+        function getSampleID(callback){
+            $.ajax({
+                url: APIUrl + "sample/id",
+            }).done(function(url) {
+                if(url.status == 200) {
+                    return callback(url.response);
+                }
+                return false;
+            });
+        }
+
+        function setMostRecentSampleID() {
+            var data = getSampleID(function(data){
+                if(data !== false){
+                    console.log(data.id)
+                } else {
+                    console.log("Get Sample ID Failed");
+                }
+            });
+           // $("#Sample_Form_List:last-child group input[ajax_name='id']").val(getSampleID().response.id);
+        }
 
         //Drum data
         $.fn.serializeObject = function() {
@@ -48,13 +65,17 @@
             $('form').submit(function() {
                 var drumData = JSON.stringify($('form').serializeObject());
                 console.log(drumData);
-
             });
         });
 
+        function addSample(){
+            $("#Sample_Form_List").append($(Sample_Form_Template).clone());
+            console.log(Sample_Form_Template);
+        }
+
         //get extra info
         $.getJSON('http://ipinfo.io', function(data){
-            console.log(data)
+            console.log(data);
         })
     </script>
 </head>
@@ -107,19 +128,63 @@
                 </div>
             </div>
             <div page_id="2" class="page content-wrapper">
-                <h1>Submit Forms</h1>
-                <label>Drum ID</label>
-                <input name="drumID" type="text" placeholder="e.g. AU0ADS9G">
-                <label>Place</label>
-                <input name="drumPlace" type="text" placeholder="e.g. Bore Location">
-                <label>Time</label>
-                <input name="drumTime" type="text" placeholder="i.e. The time core was removed">
-                <label>Depth (Min and Max)</label>
-                <input name="drumMinDepth" class="range" type="text" placeholder="Min">
-                <input name="drumMaxDepth" class="range" type="text" placeholder="Max">
-                <label>Dispatched By</label>
-                <input name="drumDispatcher" type="text" placeholder="e.g. John Smith">
-                <input id="submit" type="submit">
+                <form id="add-barrel" action="" method="POST">
+                    <h4>New Barrel</h4>
+                    <input name="drumID" type="hidden">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <label>Place</label>
+                            <input name="drumPlace" type="text" placeholder="e.g. Bore Location">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <label>Time</label>
+                            <input name="drumTime" type="text" placeholder="i.e. The time core was removed">
+                        </div>
+                        <div class="col-sm-6">
+                            <label>Dispatched By</label>
+                            <input name="drumDispatcher" type="text" placeholder="e.g. John Smith">
+                        </div>
+                    </div>
+                    <div id="Samples_Form" class="row">
+                        <div class="col-xs-12">
+                            <div class="row">
+                                <div class="col-xs-6">
+                                    <h5>Samples</h5>
+                                </div>
+                                <div class="col-xs-6">
+                                    <div class="Sample_Form_Controls">
+                                        <a class="btn btn-success" onclick="addSample()">+</a>
+                                        <a class="btn btn-danger">-</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div id="Sample_Form_List" class="col-xs-12">
+                                    <group class="row">
+                                        <div class="col-sm-2">
+                                            <input ajax_name="id" type="text" disabled placeholder="" value="">
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <input ajax_name="depth_min" type="text" placeholder="Depth Min" value="">
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <input ajax_name="depth_max" type="text" placeholder="Depth Max" value="">
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <input ajax_name="time_dug" type="text" placeholder="Time Dug" value="">
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <input ajax_name="location" type="text" placeholder="Location" value="">
+                                        </div>
+                                    </group>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <input id="submit" type="submit">
+                </form>
             </div>
         </div>
     </div>
