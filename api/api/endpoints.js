@@ -16,7 +16,6 @@ router.get('/sample/id', function(req, res, next) {
 
 // GET for fetching sample by id
 router.get('/sample/:id', function(req, res, next) {
-
   return res.json({});
 });
 
