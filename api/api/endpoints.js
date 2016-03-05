@@ -9,8 +9,10 @@ var Sample = mongoose.model('Sample');
 var id = 1;
 
 function randomWithRange(min, max) {
+  console.log('making random');
   var range = (max - min);
-  return ((Math.random() * range) + min).toFixed(2);
+  var thisThing = (Math.random() * range) + min;
+  return thisThing.toFixed(2);
 }
 
 // GET for fetching next sample id
@@ -176,8 +178,8 @@ router.post('/drum/start/:id', function (req, res, next) {
 
 // POST for updating drum
 router.post('/drum/update/:id', function (req, res, next) {
-  Drum.find({drumId: req.params.id}, function (err, drum) {
-
+  Drum.find({"info.drumId": req.params.id}, function (err, drum) {
+    console.log(drum);
     drum.info.trackingData.location.push(req.body.location);
     drum.info.trackingData.humidity.push(req.body.humidity);
     drum.info.trackingData.temp.push(req.body.temp);
@@ -199,6 +201,13 @@ router.get('/data/dash/temp', function (req, res, next) {
   }
   return res.json({status: 200, response: {temps: averageTemps}})
 
+});
+
+router.get('/data/dash/random/:min/:max', function(req, res, next){
+  console.log(req.params.min);
+  var min = req.params.min, max = req.params.max;
+  console.log(randomWithRange(min, max));
+  return res.json({status : 200, response : {random : randomWithRange(req.params.min, req.params.max)}});
 });
 
 
