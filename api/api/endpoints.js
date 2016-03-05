@@ -115,7 +115,7 @@ router.get('/drum/all', function (req, res, next) {
     Drum.find({}, function (err, drums) {
         if (err) return res.json({status: 500}).end();
         for (var i = 0; i < drums.length; i++) {
-            drumList.append(drums[i].info.drumId);
+            drumList.push(drums[i].info.drumId);
         }
         if (drumList.length > 0) {
             res.json({status: 200, response: drumList});
