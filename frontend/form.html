@@ -1,1 +1,90 @@
-<html
+<html>
+<head>
+    <title>Form</title>
+    <link href="form.css" media="all" rel="stylesheet" type="text/css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <script src="http://malsup.github.com/jquery.form.js"></script>
+
+    <script>
+        // wait for the DOM to be loaded
+
+        //        $('input').each(function() {
+        //            if (this.val() === "") {
+        //                this.css('border: 2px solid red;');
+        //                return false;
+        //            }
+        //
+        //            return true;
+        //        });
+
+        $(document).ready(function() {
+            // bind 'myForm' and provide a simple callback function
+            $('#myForm').ajaxForm(function() {
+
+                //validate
+                if (false) {
+
+                } else {
+                    $('#form').html('<p>Sample has been catalogued.</p>');
+                    //form submitted
+                }
+
+            });
+        });
+
+
+
+        //drum data
+        $.fn.serializeObject = function()
+        {
+            var o = {};
+            var a = this.serializeArray();
+            $.each(a, function() {
+                if (o[this.name] !== undefined) {
+                    if (!o[this.name].push) {
+                        o[this.name] = [o[this.name]];
+                    }
+                    o[this.name].push(this.placeholder || '');
+                } else {
+                    o[this.name] = this.placeholder || '';
+                }
+            });
+            return o;
+        };
+
+        //return drum data
+        $(function() {
+            $('form').submit(function() {
+                var drumData = JSON.stringify($('form').serializeObject());
+                console.log(drumData);
+
+            });
+        });
+
+        //get extra info
+        $.getJSON('http://ipinfo.io', function(data){
+            console.log(data)
+        })
+
+    </script>
+</head>
+<body>
+<div id="form">
+    <p>Catalogue a new sample by filling out this form.</p>
+    <form id="myForm" action="" method="POST">
+        <label>Drum ID</label>
+        <input name="drumID" type="text" placeholder="e.g. AU0ADS9G">
+        <label>Place</label>
+        <input name="drumPlace" type="text" placeholder="e.g. Bore Location">
+        <label>Time</label>
+        <input name="drumTime" type="text" placeholder="i.e. The time core was removed">
+        <label>Depth (Min and Max)</label>
+        <input name="drumMinDepth" class="range" type="text" placeholder="Min">
+        <input name="drumMaxDepth" class="range" type="text" placeholder="Max">
+        <label>Dispatched By</label>
+        <input name="drumDispatcher" type="text" placeholder="e.g. John Smith">
+        <input id="submit" type="submit">
+    </form>
+</div>
+</body>
+</html>

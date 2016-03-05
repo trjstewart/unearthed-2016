@@ -1,0 +1,47 @@
+body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+div {
+    width: 300px;
+    /*background-color: #eee;*/
+    padding: 20px;
+    margin: auto;
+}
+
+div p {
+    font-weight: 600;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 12px;
+}
+
+input {
+    border: 1px solid #A33F0D;
+    padding: 10px 15px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+input#submit {
+    display: block;
+    background-color: #1B1464;
+    color: white;
+    text-transform: uppercase;
+    border: none;
+    padding: 20px 10px;
+    width: 100%;
+    font-weight: 600;
+}
+
+input.range {
+    width: 49%;
+    display: inline;
+}
+
+#success {
+
+}
