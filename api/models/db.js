@@ -10,7 +10,7 @@ var Schema = mongoose.Schema;
 
 var drumSchema = new Schema({
   info : {
-    drumId: { type: Number, required: true },it 
+    drumId: { type: Number, required: true },
     samples: { type: Array, default: [] },
     trackingData: {
       location: [String],
@@ -39,14 +39,9 @@ var Drum = mongoose.model('Drum', drumSchema);
 //***************************//
 
 var sampleSchema = new Schema({
-<<<<<<< Updated upstream
-  sampleId: { type: Number, required: true }
-  //someData: { type: String }
-=======
   sampleId: { type: Number, required: true },
   lab : {},
   analyst : {}
->>>>>>> Stashed changes
 });
 
 var Sample = mongoose.model('Sample', sampleSchema);
