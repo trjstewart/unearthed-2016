@@ -24,7 +24,7 @@ router.get('/sample/:id', function(req, res, next) {
 
   var id = req.params.id;
 
-  Drum.find({ info.samples.sampleId: id }, function(err, drum) {
+  Drum.find({ "info.samples.sampleId" : id }, function(err, drum) {
 
     if(err) {
       return res.json({
@@ -61,7 +61,11 @@ router.get('/drum/all', function(req, res, next){
     for (var i = 0; i < drums.length; i++){
       drumList.append(drums[i].info.drumId);
     }
-    res.json({status : 200, response : drumList});
+    if (drumList.length > 0) {
+      res.json({status: 200, response: drumList});
+    } else {
+      res.json({status: 404, response : {message : "No Drums Found."}})
+    }
   });
 });
 
@@ -105,7 +109,8 @@ router.post('/drum/start/:id', function(req, res, next) {
         location : [req.body.location], // [latitude, longitude]
         humidity : [req.body.humidity],
         temp : [req.body.temp]
-      }
+      },
+      samples : req.body.samples
     };
 
     drum.save(function(err){
