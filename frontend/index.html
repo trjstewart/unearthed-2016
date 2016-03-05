@@ -6,7 +6,7 @@
     <link href="css/bootstrap.min.css" media="all" rel="stylesheet" type="text/css">
     <link href="css/style.css" media="all" rel="stylesheet" type="text/css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
-    <script src="https://code.highcharts.com"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
     <script type="text/javascript">
         var APIUrl = "http://ec2-54-206-19-157.ap-southeast-2.compute.amazonaws.com:3000/api/";
 
@@ -69,14 +69,31 @@
         };
 
 
-        function changePage(page) {
+        function changePage(page, barrelId) {
+            barrelId = barrelId || null;
             $(".page").removeClass("active");
-            $(".page[page_id='"+page+"']").addClass("active");
+            var newPage = $(".page[page_id='"+page+"']");
+            newPage.addClass("active");
+            switch (page){
+                case 1:
+                    newPage.find('#barrel-id').text(barrelId);
+                    break;
+            }
         }
 
         $(document).ready(function() {
             SampleList.Template = $("#Sample_Form_List group").clone();
             SampleList.setMostRecent();
+
+            $.get(APIUrl + 'drum/all', {},function(drums){
+                $.each(drums,function(index,drum){
+                    $(".barrel-select").append("<li data-id='" + drum + "'><a href=\"#\">" + drum + "</a></li>")
+                });
+            });
+
+            $('.barrel-select').on("click", 'li', function(e){
+                changePage(1, $(this).data('id'));
+            })
         });
 
         $("#SamplesForm_Submit").click(function(){
@@ -116,21 +133,14 @@
             <div class="sidebar">
                 <h4>Select a Barrel</h4>
                 <ul class="barrel-select">
-                    <a href="#"><li class="active">AU0ADS9G</li></a>
-                    <a href="#"><li>PJKADSHS</li></a>
-                    <a href="#"><li>BU0ACS9G</li></a>
-                    <a href="#"><li>IU0ABS8H</li></a>
-                    <a href="#"><li>AY0ADS9F</li></a>
-                    <a href="#"><li>VU0AHS6G</li></a>
-                    <a href="#"><li>A90AOS9D</li></a>
-                    <a href="#"><li>AU0AFD5A</li></a>
-                    <a href="#"><li>G20ADS4G</li></a>
-                    <a href="#"><li>HU0ADS1E</li></a>
-                    <a href="#"><li>T60ADT9G</li></a>
-                    <a href="#"><li>AU0ADJ7G</li></a>
+
                 </ul>
             </div>
-            <div page_id="1" id="ViewBarrel" class="page active content-wrapper">
+            <div page_id="3" id="mainDash" class="page active content-wrapper">
+                <h4>Dashboard</h4>
+            </div>
+
+            <div page_id="1" id="ViewBarrel" class="page content-wrapper">
                 <div class="content-header">
                     <div class="container-fluid">
                         <div class="row">
@@ -140,7 +150,7 @@
                                 </a>
                             </div>
                             <div class="col-xs-11">
-                                <h4 class="barrel-title"><b>Barrel ID:</b> AU0ADS9G</h4>
+                                <h4 class="barrel-title"><b>Barrel ID:</b> <span id="barrel-id"></span></h4>
                             </div>
                          </div>
                     </div>

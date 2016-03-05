@@ -213,6 +213,15 @@ router.get('/data/dash/temp', function (req, res, next) {
 
 });
 
+router.get('/data/dash/humid', function (req, res, next) {
+  var averageHumids = [];
+  for (var i = 0; i < 50; i++) {
+    averageTemps.push(randomWithRange(55, 85));
+  }
+  return res.json({status: 200, response: {temps: averageHumids}})
+
+});
+
 router.get('/data/dash/random/:min/:max', function(req, res, next){
   return res.json({status : 200, response : {random : randomWithRange(parseInt(req.params.min), parseInt(req.params.max))}});
 });
