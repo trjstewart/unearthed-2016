@@ -186,8 +186,22 @@ router.post('/drum/update/:id', function (req, res, next) {
         });
 
     });
-    return res.json({});
 });
+
+
+// GET for average time
+router.get('/data/dash/time', function (req, res) {
+
+  //Return "Average" Time in seconds
+  return res.json({
+    status: 200,
+    response: {
+      averageTime: 39 * 60 * 60 //seconds
+    }
+  });
+
+});
+
 
 
 //*********************************//
