@@ -14,7 +14,11 @@ function randomWithRange(min, max) {
 
 // GET for checking current sample ID
 router.get('/sample/id', function(req, res, next){
-  return res.json({status : 200, response : {id : id}});
+  var thisId = id.toString();
+  while (thisId.length < 4) {
+    thisId = '0' + thisId;
+  }
+  return res.json({status : 200, response : {id : thisId}});
 });
 
 // POST for fetching next sample id
