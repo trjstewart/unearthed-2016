@@ -46,6 +46,12 @@
                         console.log("Get Sample ID Failed");
                     }
                 });
+            },
+            data: function(){
+                $('form').submit(function() {
+                    var drumData = JSON.stringify($('form').serializeObject());
+                    console.log(drumData);
+                });
             }
         };
 
@@ -74,19 +80,11 @@
         $(document).ready(function() {
             SampleList.Template = $("#Sample_Form_List group").clone();
             SampleList.setMostRecent();
-            console.log(LongLat.generate());
         });
 
-        //Drum dat
-
-        //return drum data
-        $(function() {
-            $('form').submit(function() {
-                var drumData = JSON.stringify($('form').serializeObject());
-                console.log(drumData);
-            });
+        $("#SamplesForm_Submit").click(function(){
+            console.log(SampleList.data);
         });
-
 
         //Interaction Functions
         function SampleForm_AddSample(){
@@ -204,7 +202,7 @@
                             </div>
                         </div>
                     </div>
-                    <input id="submit" type="submit">
+                    <input id="SamplesForm_Submit" type="button">
                 </form>
             </div>
         </div>
