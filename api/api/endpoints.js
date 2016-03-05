@@ -154,11 +154,6 @@ router.post('/drum/start/:id', function (req, res, next) {
     new Drum({
         info: {
             drumId: req.params.id,
-            trackingData: {
-                location: [req.body.location], // [latitude, longitude]
-                humidity: [req.body.humidity],
-                temp: [req.body.temp]
-            },
             samples: req.body.samples
         }
     }).save(function (err) {
