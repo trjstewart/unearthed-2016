@@ -181,7 +181,7 @@ router.post('/drum/start/:id', function (req, res, next) {
 
 // POST for updating drum
 router.post('/drum/update/:id', function (req, res, next) {
-  Drum.find({"info.drumId": req.params.id}, function (err, drum) {
+  Drum.findOne({"info.drumId": req.params.id}, function (err, drum) {
     console.log(JSON.stringify(drum));
 
     drum.info.trackingData.location.push(req.body.location);
