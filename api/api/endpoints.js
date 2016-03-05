@@ -8,6 +8,11 @@ var Sample = mongoose.model('Sample');
 
 var id = 1;
 
+function randomWithRange(min, max) {
+    var range = (max - min) + 1;
+    return (Math.random() * range) + min;
+}
+
 // GET for fetching next sample id
 router.get('/sample/id', function (req, res, next) {
     if (id > 9999) {
@@ -187,6 +192,14 @@ router.post('/drum/update/:id', function (req, res, next) {
 
     });
     return res.json({});
+});
+
+router.get('/data/dash/temp', function(req, res, next){
+    var averageTemps = [];
+    for (var i = 0; i < 50; i++){
+        averageTemps.push(randomWithRange(25,45));
+    }
+    return res.json({status : 200, response : {temps : averageTemps}})
 });
 
 
