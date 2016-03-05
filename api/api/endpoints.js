@@ -10,6 +10,9 @@ var id = 1;
 
 // GET for fetching next sample id
 router.get('/sample/id', function (req, res, next) {
+    if (id > 9999) {
+        id = 1;
+    }
     var thisId = id.toString();
     while (thisId.length < 4) {
         thisId = '0' + thisId;
