@@ -7,7 +7,7 @@
     <link href="css/style.css" media="all" rel="stylesheet" type="text/css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
     <script type="text/javascript">
-        var APIUrl = "http://ec2-54-206-23-214.ap-southeast-2.compute.amazonaws.com:3000/api/";
+        var APIUrl = "http://ec2-54-206-19-157.ap-southeast-2.compute.amazonaws.com:3000/api/";
 
         //Longitude and Langitude
         var LongLat = {
@@ -35,6 +35,8 @@
                         return callback(url.response);
                     }
                     return false;
+                }).error(function(){
+                    return false;
                 });
             },
             setMostRecent: function() {
@@ -48,27 +50,21 @@
                 });
             },
             data: function(){
-                $('form').submit(function() {
-                    var drumData = JSON.stringify($('form').serializeObject());
-                    console.log(drumData);
+                var Data = {};
+                Data.Samples = [];
+                $("#add-barrel *:not(.Samples_Form) input").each(function(){
+                    Data[$(this).attr("name")] = $(this).val();
                 });
+                $("#Sample_Form_List group").each(function(){
+                    var SampleData = {};
+                    $("#Sample_Form_List group input").each(function(){
+                        SampleData[$(this).attr("ajax_name")] = $(this).val();
+                    });
+                    Data.Samples.push(SampleData);
+                });
+                return Data;
+                return JSON.stringify(Data);
             }
-        };
-
-        $.fn.serializeObject = function() {
-            var o = {};
-            var a = this.serializeArray();
-            $.each(a, function() {
-                if (o[this.name] !== undefined) {
-                    if (!o[this.name].push) {
-                        o[this.name] = [o[this.name]];
-                    }
-                    o[this.name].push(this.placeholder || '');
-                } else {
-                    o[this.name] = this.placeholder || '';
-                }
-            });
-            return o;
         };
 
 
@@ -96,6 +92,9 @@
             $("#Sample_Form_List group:last-child").remove();
         }
 
+        function SampleForm_Submit(){
+            console.log(SampleList.data());
+        }
     </script>
 </head>
 <body>
@@ -153,17 +152,17 @@
                     <div class="row">
                         <div class="col-xs-12">
                             <label>Place</label>
-                            <input name="drumPlace" type="text" placeholder="e.g. Bore Location">
+                            <input name="drumPlace" value="" type="text" placeholder="e.g. Bore Location">
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-sm-6">
                             <label>Time</label>
-                            <input name="drumTime" type="text" placeholder="i.e. The time core was removed">
+                            <input name="drumTime" value="" type="text" placeholder="i.e. The time core was removed">
                         </div>
                         <div class="col-sm-6">
                             <label>Dispatched By</label>
-                            <input name="drumDispatcher" type="text" placeholder="e.g. John Smith">
+                            <input name="drumDispatcher" value="" type="text" placeholder="e.g. John Smith">
                         </div>
                     </div>
                     <div id="Samples_Form" class="row">
@@ -202,7 +201,7 @@
                             </div>
                         </div>
                     </div>
-                    <input id="SamplesForm_Submit" type="button">
+                    <input id="SamplesForm_Submit" onclick="SampleForm_Submit" type="button" value="Submit Barrel with Samples">
                 </form>
             </div>
         </div>

@@ -161,7 +161,7 @@ body {
     width: 100%;
 }
 
-#add-barrel input#submit {
+#add-barrel input#SamplesForm_Submit {
     display: block;
     background-color: #1B1464;
     color: white;
