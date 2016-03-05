@@ -40,6 +40,9 @@ var Drum = mongoose.model('Drum', drumSchema);
 
 var sampleSchema = new Schema({
   sampleId: { type: Number, required: true },
+  depth: [], // [min, max]
+  timeDug : String,
+  borehole : String,
   lab : {
     results : {
       coalComp : Number,
