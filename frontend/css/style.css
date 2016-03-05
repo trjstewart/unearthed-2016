@@ -26,6 +26,61 @@ body {
     width: 300px;
 }
 
+.Title {
+    margin: 0;
+    text-transform: uppercase;
+    color: #fff;
+    font-size: 24px;
+    line-height: 55px;
+    padding-left: 23px;
+    font-weight: bold;
+}
+
+.sidebar h4 {
+    padding: 20px 40px 5px 40px;
+    text-transform: uppercase;
+}
+
+.barrel-select {
+    list-style: none;
+    margin:0;
+    padding:0;
+}
+
+.barrel-select li {
+    padding: 11px 70px;
+    color:#ddd;
+    position: relative;
+}
+
+.barrel-select li:hover {
+    color: #FFF;
+}
+
+.barrel-select li.active {
+    background: #232D31;
+    color: #fff;
+}
+
+.barrel-select li::before {
+    content: " ";
+    position: absolute;
+    left: 45px;
+    width: 10px;
+    height: 10px;
+    top: 15px;
+    border-radius: 50%;
+    border: 1px solid #fff;
+}
+
+.barrel-select a {
+    text-decoration: none;
+}
+
+.barrel-select li.active::before {
+    background:#fff;
+}
+
 .content-wrapper {
     display: table-cell;
     vertical-align: top;
@@ -52,4 +107,24 @@ body {
 .content-header i.back:hover {
     color:#333;
     cursor: pointer;
+}
+
+.btn-primary {
+    background: #F12828;
+    border: 1px solid #EA1A1A;
+    color: #fff;
+    border-radius: 30px;
+    padding: 5px 20px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.btn-primary:hover {
+    background: #D41A1A;
+}
+
+.barrel-button {
+    margin-top: 12px;
+    float: right;
+    margin-right: 30px;
 }
