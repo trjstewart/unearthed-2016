@@ -10,7 +10,7 @@ var Schema = mongoose.Schema;
 
 var drumSchema = new Schema({
   info : {
-    drumId: { type: Number, required: true },
+    drumId: { type: Number, required: true },it 
     samples: { type: Array, default: [] },
     trackingData: {
       location: [String],
