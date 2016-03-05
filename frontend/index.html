@@ -30,6 +30,11 @@
         var SampleList = {
             Template: "",
             StartingID: 0,
+            init: function(){
+                this.Template = $("#Sample_Form_List group").clone();
+                this.setMostRecent();
+                this.StartingID = this.getId();
+            },
             getId: function(callback){
                 $.ajax({
                     url: APIUrl + "sample/id",
@@ -91,8 +96,7 @@
         }
 
         $(document).ready(function() {
-            SampleList.Template = $("#Sample_Form_List group").clone();
-            SampleList.setMostRecent();
+            SampleList.init();
 
             $.get(APIUrl + 'drum/all', {},function(drums){
                 $.each(drums,function(index,drum){
@@ -103,6 +107,7 @@
             $('.barrel-select').on("click", 'li', function(e){
                 changePage(1, $(this).data('id'));
             })
+
         });
 
         $("#SamplesForm_Submit").click(function(){
