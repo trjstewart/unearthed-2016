@@ -18,10 +18,6 @@ var drumSchema = new Schema({
       temp: []
     },
     time: { type: Date, default: Date.now },
-    depth : {
-      min : Number,
-      max : Number
-    },
     dispatcher: String
   }
 });
