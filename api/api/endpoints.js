@@ -47,7 +47,16 @@ router.post('/sample/update/:id', function(req, res, next) {
   return res.json({});
 });
 
-
+router.get('/drum/all', function(req, res, next){
+  var drumList = [];
+  Drum.find({}, function(err, drums){
+    if (err) return res.json({status: 500}).end();
+    for (var i = 0; i < drums.length; i++){
+      drumList.append(drums[i].info.drumId);
+    }
+    res.json({status : 200, response : drumList});
+  });
+});
 
 // GET for updating drum
 router.get('/drum/:id', function(req, res) {
@@ -64,7 +73,7 @@ router.get('/drum/:id', function(req, res) {
     //if drum not found
     if(!drum) {
       return res.json({
-        status: 302, //maybe 301 i unno
+        status: 404,
         response: {}
       });
     }
