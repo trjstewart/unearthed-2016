@@ -11,19 +11,25 @@ var Schema = mongoose.Schema;
 var drumSchema = new Schema({
   info : {
     drumId: { type: Number, required: true },
-    samples: { type: Array, default: [] }
-  },
-  lab : {
-
-  },
-  analyst : {
-
+    samples: { type: Array, default: [] },
+    trackingData: {
+      location: [String],
+      humidity: [Number],
+      temp: [Number]
+    },
+    time: String,
+    depth : {
+      min : Number,
+      max : Number
+    },
+    dispatcher: String
   }
-  //Temperature data array
-  //
 });
 
 var Drum = mongoose.model('Drum', drumSchema);
+
+
+
 
 
 //****************************//
@@ -33,8 +39,9 @@ var Drum = mongoose.model('Drum', drumSchema);
 //***************************//
 
 var sampleSchema = new Schema({
-  sampleId: { type: Number, required: true }
-  //someData: { type: String }
+  sampleId: { type: Number, required: true },
+  lab : {},
+  analyst : {}
 });
 
 var Sample = mongoose.model('Sample', sampleSchema);
