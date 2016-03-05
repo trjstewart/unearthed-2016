@@ -9,10 +9,7 @@ var Sample = mongoose.model('Sample');
 var id = 1;
 
 function randomWithRange(min, max) {
-  console.log('making random');
-  var range = (max - min);
-  var thisThing = (Math.random() * range) + min;
-  return thisThing.toFixed(2);
+  return ((Math.random() * (max - min)) + min).toFixed(2);
 }
 
 // GET for fetching next sample id
@@ -208,10 +205,7 @@ router.get('/data/dash/temp', function (req, res, next) {
 });
 
 router.get('/data/dash/random/:min/:max', function(req, res, next){
-  console.log(req.params.min);
-  var min = req.params.min, max = req.params.max;
-  console.log(randomWithRange(min, max));
-  return res.json({status : 200, response : {random : randomWithRange(req.params.min, req.params.max)}});
+  return res.json({status : 200, response : {random : randomWithRange(parseInt(req.params.min), parseInt(req.params.max))}});
 });
 
 
