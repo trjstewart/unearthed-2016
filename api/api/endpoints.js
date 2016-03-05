@@ -10,7 +10,36 @@ var Sample = mongoose.model('Sample');
 // GET for fetching next sample id
 router.get('/sample/id', function(req, res, next) {
 
-  return res.json({});
+  //find largest sampleId
+  Sample.find({ sampleId: }
+    .limit(1)
+    .sort({ sampleId: -1 })
+    .select('sampleId')
+    .exec(function(err, sampleId) {
+      if(err) {
+        console.log(err);
+      }
+
+      //if no previous id set
+      if(!sampleId) {
+        return res.json({
+          status: 200,
+          response: {
+            sampleId: 0000
+          }
+        });
+      }
+
+      //previous id found, increment by 1 then send
+      return res.json({
+        status: 200,
+        response: {
+          sampleId: sampleId++
+        }
+      });
+
+    });
+  });
 });
 
 
@@ -30,10 +59,7 @@ router.post('/sample/create', function(req, res) {
 
   newSample.save(function(err) {
     if(err) {
-      return res.json({
-        status: 500,
-        response: {}
-      });
+      return res.json({ status: 500 });
     }
 
     //Saved sample successfully
