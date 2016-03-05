@@ -136,7 +136,7 @@ router.get('/drum/all', function (req, res, next) {
 // GET for updating drum
 router.get('/drum/:id', function (req, res) {
 
-  Drum.findOne({drumId: req.params.id}, function (err, drum) {
+  Drum.findOne({"info.drumId": req.params.id}, function (err, drum) {
 
     if (err) {
       return res.json({
@@ -156,7 +156,10 @@ router.get('/drum/:id', function (req, res) {
     //Return drum found
     return res.json({
       status: 200,
-      response: drum
+      response: {
+        drum : drum,
+        inf0 : drum.info.trackingData
+      }
     });
 
   });
@@ -179,7 +182,8 @@ router.post('/drum/start/:id', function (req, res, next) {
 // POST for updating drum
 router.post('/drum/update/:id', function (req, res, next) {
   Drum.find({"info.drumId": req.params.id}, function (err, drum) {
-    console.log(drum);
+    console.log(JSON.stringify(drum));
+
     drum.info.trackingData.location.push(req.body.location);
     drum.info.trackingData.humidity.push(req.body.humidity);
     drum.info.trackingData.temp.push(req.body.temp);
