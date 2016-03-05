@@ -6,7 +6,57 @@
     <link href="css/bootstrap.min.css" media="all" rel="stylesheet" type="text/css">
     <link href="css/style.css" media="all" rel="stylesheet" type="text/css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
-    <script src="https://code.highcharts.com"></script>
+    <script type="text/javascript">
+        function changePage(page) {
+            $(".page").removeClass("active");
+            $(".page[page_id='"+page+"']").addClass("active");
+        }
+
+        $(document).ready(function() {
+            $('#myForm').ajaxForm(function() {
+
+                //validate - Place holder
+                if (false) {
+
+                } else {
+                    $('#form').html('<p>Sample has been catalogued.</p>');
+                    //form submitted
+                }
+
+            });
+        });
+
+        //Drum data
+        $.fn.serializeObject = function() {
+            var o = {};
+            var a = this.serializeArray();
+            $.each(a, function() {
+                if (o[this.name] !== undefined) {
+                    if (!o[this.name].push) {
+                        o[this.name] = [o[this.name]];
+                    }
+                    o[this.name].push(this.placeholder || '');
+                } else {
+                    o[this.name] = this.placeholder || '';
+                }
+            });
+            return o;
+        };
+
+        //return drum data
+        $(function() {
+            $('form').submit(function() {
+                var drumData = JSON.stringify($('form').serializeObject());
+                console.log(drumData);
+
+            });
+        });
+
+        //get extra info
+        $.getJSON('http://ipinfo.io', function(data){
+            console.log(data)
+        })
+    </script>
 </head>
 <body>
     <div class="page-header-nav">
@@ -16,7 +66,7 @@
                     <h1 class="Title">Dashboard</h1>
                 </div>
                 <div class="col-xs-6">
-                    <a href="#" class="btn btn-default btn-primary barrel-button">New Barrel</a>
+                    <a href="#" onclick="changePage(2)" class="btn btn-default btn-primary barrel-button">New Barrel</a>
                 </div>
             </div>
         </div>
@@ -40,7 +90,7 @@
                     <a href="#"><li>AU0ADJ7G</li></a>
                 </ul>
             </div>
-            <div class="content-wrapper">
+            <div page_id="1" class="page active content-wrapper">
                 <div class="content-header">
                     <div class="container-fluid">
                         <div class="row">
@@ -55,6 +105,21 @@
                          </div>
                     </div>
                 </div>
+            </div>
+            <div page_id="2" class="page content-wrapper">
+                <h1>Submit Forms</h1>
+                <label>Drum ID</label>
+                <input name="drumID" type="text" placeholder="e.g. AU0ADS9G">
+                <label>Place</label>
+                <input name="drumPlace" type="text" placeholder="e.g. Bore Location">
+                <label>Time</label>
+                <input name="drumTime" type="text" placeholder="i.e. The time core was removed">
+                <label>Depth (Min and Max)</label>
+                <input name="drumMinDepth" class="range" type="text" placeholder="Min">
+                <input name="drumMaxDepth" class="range" type="text" placeholder="Max">
+                <label>Dispatched By</label>
+                <input name="drumDispatcher" type="text" placeholder="e.g. John Smith">
+                <input id="submit" type="submit">
             </div>
         </div>
     </div>

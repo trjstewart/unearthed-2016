@@ -17,6 +17,10 @@ body {
     display: table-row;
 }
 
+.page:not(.active) {
+    display: none;
+}
+
 .sidebar {
     background-color: #263238;
     color: #fff;
