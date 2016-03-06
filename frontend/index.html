@@ -7,12 +7,14 @@
     <link href="css/style.css" media="all" rel="stylesheet" type="text/css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
     <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBNpxqu91P9CqiTOufR6xyoinSJrf7EMqs"></script>
     <script type="text/javascript">
         var APIUrl = "http://ec2-54-206-19-157.ap-southeast-2.compute.amazonaws.com:3000/api/";
 
+
         //Longitude and Langitude
         var LongLat = {
-            generateType: function(Long) {
+            generateType: function (Long) {
                 var long = typeof Long !== 'undefined' || false ? 2 : 1;
                 var num = (Math.random() * (90 * long)).toFixed(3);
                 if (Math.floor(Math.random()) == 0) {
@@ -20,29 +22,29 @@
                 }
                 return num;
             },
-            generate: function(){
-                return [this.generateType(),this.generateType(true)]
+            generate: function () {
+                return [this.generateType(), this.generateType(true)]
             }
         };
 
         //Sample List
         var SampleList = {
             Template: "",
-            getId: function(callback){
+            getId: function (callback) {
                 $.ajax({
                     url: APIUrl + "sample/id",
-                }).done(function(url) {
-                    if(url.status == 200) {
+                }).done(function (url) {
+                    if (url.status == 200) {
                         return callback(url.response);
                     }
                     return false;
-                }).error(function(){
+                }).error(function () {
                     return false;
                 });
             },
-            setMostRecent: function() {
-                this.getId(function(data){
-                    if(data !== false){
+            setMostRecent: function () {
+                this.getId(function (data) {
+                    if (data !== false) {
                         $("#Sample_Form_List group:last-child input[ajax_name='id']").val(data.id);
                         $("#Sample_Form_List group:last-child input[ajax_name='location']").val(LongLat.generate().join(","));
                     } else {
@@ -50,15 +52,15 @@
                     }
                 });
             },
-            data: function(){
+            data: function () {
                 var Data = {};
                 Data.Samples = [];
-                $("#add-barrel *:not(.Samples_Form) input").each(function(){
+                $("#add-barrel *:not(.Samples_Form) input").each(function () {
                     Data[$(this).attr("name")] = $(this).val();
                 });
-                $("#Sample_Form_List group").each(function(){
+                $("#Sample_Form_List group").each(function () {
                     var SampleData = {};
-                    $("#Sample_Form_List group input").each(function(){
+                    $("#Sample_Form_List group input").each(function () {
                         SampleData[$(this).attr("ajax_name")] = $(this).val();
                     });
                     Data.Samples.push(SampleData);
@@ -72,150 +74,354 @@
         function changePage(page, barrelId) {
             barrelId = barrelId || null;
             $(".page").removeClass("active");
-            var newPage = $(".page[page_id='"+page+"']");
+            var newPage = $(".page[page_id='" + page + "']");
             newPage.addClass("active");
-            switch (page){
+            switch (page) {
                 case 1:
                     newPage.find('#barrel-id').text(barrelId);
                     break;
             }
         }
 
-        $(document).ready(function() {
+        $(document).ready(function () {
             SampleList.Template = $("#Sample_Form_List group").clone();
             SampleList.setMostRecent();
 
-            $.get(APIUrl + 'drum/all', {},function(drums){
-                $.each(drums,function(index,drum){
+            $.get(APIUrl + 'drum/all', {}, function (drums) {
+                $.each(drums, function (index, drum) {
                     $(".barrel-select").append("<li data-id='" + drum + "'><a href=\"#\">" + drum + "</a></li>")
                 });
             });
 
-            $('.barrel-select').on("click", 'li', function(e){
+            $('.barrel-select').on("click", 'li', function (e) {
                 changePage(1, $(this).data('id'));
-            })
+            });
+
+            dashLoad();
+            initMap();
         });
 
-        $("#SamplesForm_Submit").click(function(){
+        $("#SamplesForm_Submit").click(function () {
             console.log(SampleList.data);
         });
 
         //Interaction Functions
-        function SampleForm_AddSample(){
+        function SampleForm_AddSample() {
             $("#Sample_Form_List").append($(SampleList.Template).clone());
             SampleList.setMostRecent();
         }
 
-        function SampleForm_RemoveSample(){
+        function SampleForm_RemoveSample() {
             $("#Sample_Form_List group:last-child").remove();
         }
 
-        function SampleForm_Submit(){
+        function SampleForm_Submit() {
             console.log(SampleList.data());
         }
+
+        function getRandData(type, callback) {
+            var min, max;
+
+            if (type == 'humid') {
+                min = 55;
+                max = 85;
+            } else if (type == 'temp') {
+                min = 25;
+                max = 45;
+            }
+
+            $.get(APIUrl + 'data/dash/random/' + min + '/' + max, function (data) {
+                if (data.status == 200) {
+                    return callback(data.response.random);
+                }
+            });
+        }
+
+
+        // handle the initial load of the dashboard;
+        function dashLoad() {
+
+            $.get(APIUrl + 'data/dash/time', function(data) {
+                $('#time').html(data.response.averageTime);
+            });
+
+            var humidity, temperature;
+
+            var xArr = [];
+            for (var i = 0; i < 50; i++) {
+                xArr.push(i);
+            }
+
+            $.when(
+                    $.get(APIUrl + 'data/dash/temp'), $.get(APIUrl + 'data/dash/humid')
+            ).done(function (temp, humid) {
+                humidity = humid[0].response.temps;
+                temperature = temp[0].response.temps;
+                var tempArr = [];
+                var humArr = [];
+
+                temperature.forEach(function(temp) {
+                    tempArr.push(Number(temp));
+                });
+
+                humidity.forEach(function(humidity) {
+                   humArr.push(Number(humidity)) ;
+                });
+
+                $('#avgTemp').highcharts({
+                    chart: {
+                        type: 'areaspline'
+                    },
+                    title: {
+                        text: 'Average Temperature'
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Temp'
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#26A69A'
+                        }]
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        areaspline: {
+                            fillOpacity: 0.5
+                        }
+                    },
+                    series: [
+                    {
+                        name: 'Temperature',
+                        data: tempArr
+                    }
+                    ]
+                });
+
+                $('#avgHumid').highcharts({
+                    chart: {
+                        type: 'areaspline'
+                    },
+                    title: {
+                        text: 'Average Humidity'
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Temp'
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#E53935'
+                        }]
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    plotOptions: {
+                        areaspline: {
+                            fillOpacity: 0.5
+                        }
+                    },
+                    series: [
+                        {
+                            name: 'Humidity',
+                            data: humArr
+                        }
+                    ]
+                });
+            });
+
+            setInterval(addChartPoint, 5000);
+        }
+
+        function addChartPoint() {
+            var tempChart = $('#avgTemp').highcharts();
+            var humidChart = $('#avgHumid').highcharts();
+
+            var temp = getRandData('temp', function(result) {
+                tempChart.series[0].addPoint(Number(result));
+            });
+            var humid = getRandData('humid', function(result) {
+                humidChart.series[0].addPoint(Number(result));
+            });
+        }
+
+        function initMap() {
+
+            // Specify features and elements to define styles.
+            var styleArray = [
+                {
+                    featureType: "all",
+                    stylers: [
+                        { saturation: -80 }
+                    ]
+                },{
+                    featureType: "road.arterial",
+                    elementType: "geometry",
+                    stylers: [
+                        { hue: "#00ffee" },
+                        { saturation: 50 }
+                    ]
+                },{
+                    featureType: "poi.business",
+                    elementType: "labels",
+                    stylers: [
+                        { visibility: "off" }
+                    ]
+                }
+            ];
+
+            // Create a map object and specify the DOM element for display.
+            var map = new google.maps.Map(document.getElementById('map'), {
+                center: {lat: -34.397, lng: 150.644},
+                scrollwheel: false,
+                // Apply the map style array to the map.
+                styles: styleArray,
+                zoom: 8
+            });
+
+            $('#map').css('display', 'block');
+        }
+
+
     </script>
 </head>
 <body>
-    <div class="page-header-nav">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-xs-6">
-                    <h1 class="Title">Dashboard</h1>
-                </div>
-                <div class="col-xs-6">
-                    <a href="#" onclick="changePage(2)" class="btn btn-default btn-primary barrel-button">New Barrel</a>
-                </div>
+<div class="page-header-nav">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-6">
+                <h1 class="Title">Dashboard</h1>
+            </div>
+            <div class="col-xs-6">
+                <a href="#" onclick="changePage(2)" class="btn btn-default btn-primary barrel-button">New Barrel</a>
             </div>
         </div>
     </div>
-    <div class="page-container">
-        <div class="page-content">
-            <div class="sidebar">
-                <h4>Select a Barrel</h4>
-                <ul class="barrel-select">
+</div>
+<div class="page-container">
+    <div class="page-content">
+        <div class="sidebar">
+            <h4>Select a Barrel</h4>
+            <ul class="barrel-select">
 
-                </ul>
-            </div>
-            <div page_id="3" id="mainDash" class="page active content-wrapper">
-                <h4>Dashboard</h4>
-            </div>
+            </ul>
+        </div>
 
-            <div page_id="1" id="ViewBarrel" class="page content-wrapper">
-                <div class="content-header">
-                    <div class="container-fluid">
+        <div page_id="3" id="dashboard" class="page active content-wrapper">
+            <div class="content-header">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-xs-6 time-container" style="padding-left: 20px">
+                            <div id="time"></div>
+                            <div class="time-title">
+                                Average Time
+                            </div>
+                        </div>
+                        <div class="col-xs-6">
+                            <div id="map">
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-6 chart-container">
+                            <div class="chart" id="avgTemp">
+
+                            </div>
+                        </div>
+                        <div class="col-xs-6 chart-container">
+                            <div class="chart" id="avgHumid">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div page_id="1" id="ViewBarrel" class="page content-wrapper">
+            <div class="content-header">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-xs-1">
+                            <a href="#">
+                                <i class="back glyphicon glyphicon-circle-arrow-left"></i>
+                            </a>
+                        </div>
+                        <div class="col-xs-11">
+                            <h4 class="barrel-title"><b>Barrel ID:</b> <span id="barrel-id"></span></h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div page_id="2" id="NewBarrel" class="page content-wrapper">
+            <form id="add-barrel" action="" method="POST">
+                <h4>New Barrel</h4>
+                <label for="drumId">Drum ID</label><input id="drumId" name="drumID" type="text" maxlength="6">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <label>Place</label>
+                        <input name="drumPlace" value="" type="text" placeholder="e.g. Bore Location">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <label>Time</label>
+                        <input name="drumTime" value="" type="text" placeholder="i.e. The time core was removed">
+                    </div>
+                    <div class="col-sm-6">
+                        <label>Dispatched By</label>
+                        <input name="drumDispatcher" value="" type="text" placeholder="e.g. John Smith">
+                    </div>
+                </div>
+                <div id="Samples_Form" class="row">
+                    <div class="col-xs-12">
                         <div class="row">
-                            <div class="col-xs-1">
-                                <a href="#">
-                                    <i class="back glyphicon glyphicon-circle-arrow-left"></i>
-                                </a>
+                            <div class="col-xs-6">
+                                <h5>Samples</h5>
                             </div>
-                            <div class="col-xs-11">
-                                <h4 class="barrel-title"><b>Barrel ID:</b> <span id="barrel-id"></span></h4>
+                            <div class="col-xs-6">
+                                <div class="Sample_Form_Controls">
+                                    <a class="btn btn-success" onclick="SampleForm_AddSample()">+</a>
+                                    <a class="btn btn-danger" onclick="SampleForm_RemoveSample()">-</a>
+                                </div>
                             </div>
-                         </div>
+                        </div>
+                        <div class="row">
+                            <div id="Sample_Form_List" class="col-xs-12">
+                                <group class="row">
+                                    <div class="col-sm-2">
+                                        <input ajax_name="id" type="text" disabled placeholder="" value="">
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <input ajax_name="depth_min" type="text" placeholder="Depth Min" value="">
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <input ajax_name="depth_max" type="text" placeholder="Depth Max" value="">
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <input ajax_name="time_dug" type="text" placeholder="Time Dug" value="">
+                                    </div>
+                                    <div class="col-sm-3">
+                                        <input ajax_name="location" type="text" placeholder="Location" value="">
+                                    </div>
+                                </group>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div page_id="2" id="NewBarrel" class="page content-wrapper">
-                <form id="add-barrel" action="" method="POST">
-                    <h4>New Barrel</h4>
-                    <label for="drumId">Drum ID</label><input id="drumId" name="drumID" type="text" maxlength="6">
-                    <div class="row">
-                        <div class="col-xs-12">
-                            <label>Place</label>
-                            <input name="drumPlace" value="" type="text" placeholder="e.g. Bore Location">
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <label>Time</label>
-                            <input name="drumTime" value="" type="text" placeholder="i.e. The time core was removed">
-                        </div>
-                        <div class="col-sm-6">
-                            <label>Dispatched By</label>
-                            <input name="drumDispatcher" value="" type="text" placeholder="e.g. John Smith">
-                        </div>
-                    </div>
-                    <div id="Samples_Form" class="row">
-                        <div class="col-xs-12">
-                            <div class="row">
-                                <div class="col-xs-6">
-                                    <h5>Samples</h5>
-                                </div>
-                                <div class="col-xs-6">
-                                    <div class="Sample_Form_Controls">
-                                        <a class="btn btn-success" onclick="SampleForm_AddSample()">+</a>
-                                        <a class="btn btn-danger" onclick="SampleForm_RemoveSample()">-</a>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div id="Sample_Form_List" class="col-xs-12">
-                                    <group class="row">
-                                        <div class="col-sm-2">
-                                            <input ajax_name="id" type="text" disabled placeholder="" value="">
-                                        </div>
-                                        <div class="col-sm-2">
-                                            <input ajax_name="depth_min" type="text" placeholder="Depth Min" value="">
-                                        </div>
-                                        <div class="col-sm-2">
-                                            <input ajax_name="depth_max" type="text" placeholder="Depth Max" value="">
-                                        </div>
-                                        <div class="col-sm-3">
-                                            <input ajax_name="time_dug" type="text" placeholder="Time Dug" value="">
-                                        </div>
-                                        <div class="col-sm-3">
-                                            <input ajax_name="location" type="text" placeholder="Location" value="">
-                                        </div>
-                                    </group>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <input id="SamplesForm_Submit" onclick="SampleForm_Submit" type="button" value="Submit Barrel with Samples">
-                </form>
-            </div>
+                <input id="SamplesForm_Submit" onclick="SampleForm_Submit" type="button"
+                       value="Submit Barrel with Samples">
+            </form>
         </div>
     </div>
+</div>
+
 </body>
 </html>
