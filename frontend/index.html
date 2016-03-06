@@ -351,10 +351,21 @@
             // get number of barrels to add to page
 
             $.when(
-                    $.get(APIUrl + 'drum/all'), $.get('locations.js')
-            ).done(function (drums, locations) {
-                var drumNum = drums[0].response.length;
-                var locationArr = locations[0];
+                    $.get(APIUrl + 'drum/all')
+            ).done(function (data) {
+                var drums = data.response;
+
+                drums.forEach(function(drum) {
+                    $.get(APIUrl + 'drum/' +drum, function(data) {
+                        if (data.response.inf0.location.length > 0) {
+                            var marker = new google.maps.Marker({
+                                position: {lat: Number(data.response.inf0.location[0][0]), lng: Number(data.response.inf0.location[0][1])},
+                                title: ""
+                            });
+                            marker.setMap(map);
+                        }
+                    });
+                });
 
                 var markers = [];
 
@@ -392,6 +403,7 @@
                     styles: styleArray,
                     zoom: 4
                 });
+
 
 
                 $('#map').css('display', 'block');
