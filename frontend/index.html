@@ -95,6 +95,31 @@
             }
         }
 
+        function loadBarrelData(id){
+            $("#accordion").text('');
+            $.get(APIUrl + 'drum/' + id, {}, function(data){
+                if (data.status == 200){
+                    //$('.barrel-content').text(data.response);
+                    $.each(data.response.drum.info.samples, function(index, sample){
+                        var id = sample.sampleId;
+                        var depth = sample.depth;
+                        var timeDug = sample.timeDug;
+                        var boreHole = sample.borehole;
+                        var newElement = $('.sample-template').clone();
+                        newElement.removeClass('sample-template');
+                        newElement.find('.barrel-sample-id').text('Sample ' + id);
+                        newElement.find('.depth-from').text(depth[0]);
+                        newElement.find('.depth-to').text(depth[1]);
+                        //newElement.find('.sample-content').text(timeDug + boreHole);
+                        newElement.show();
+                        $('#accordion').append(newElement);
+                    })
+                } else {
+                    $('.barrel-content').text(data.response.message);
+                }
+            });
+        }
+
         $(document).ready(function() {
             SampleList.init();
 
@@ -106,7 +131,13 @@
 
             $('.barrel-select').on("click", 'li', function(e){
                 changePage(1, $(this).data('id'));
-            })
+                loadBarrelData($(this).data('id'));
+            });
+
+            $(document).on('click', '.panel-heading', function(e){
+                var collapse = $(this).next('.panel-collapse');
+                collapse.slideToggle();
+            });
 
         });
 
@@ -171,6 +202,50 @@
                                 <h4 class="barrel-title"><b>Barrel ID:</b> <span id="barrel-id"></span></h4>
                             </div>
                          </div>
+                    </div>
+                </div>
+                <div class="container-fluid">
+                    <div class="row barrel-graphs">
+                        <div class="col-sm-12 col-md-3">
+                            Time In Transit
+                        </div>
+                        <div class="col-sm-12 col-md-3">
+                            Humidity Graph
+                        </div>
+                        <div class="col-sm-12 col-md-3">
+                            Temperature Graph
+                        </div>
+                        <div class="col-sm-12 col-md-3">
+                            Location Graph
+                        </div>
+                    </div>
+                    <div class="row barrel-samples">
+                        <div class="panel panel-default sample-template" style="display: none;">
+                            <div class="panel-heading" role="tab" id="headingOne">
+                                <h4 class="panel-title">
+                                    <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                        <span class="barrel-sample-id"></span>
+                                    </a>
+                                </h4>
+                            </div>
+                            <div id="collapseOne" style="display: none;" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                                <div class="panel-body sample-content">
+                                    <div class="row">
+                                        <h5>Depth of Sample</h5>
+                                        From: <span class="depth-from"></span>
+                                        To: <span class="depth-to"></span>
+                                    </div>
+                                    <div class="row">
+                                        <h5>Depth of Sample</h5>
+                                        From: <span class="depth-from"></span>
+                                        To: <span class="depth-to"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+
+                        </div>
                     </div>
                 </div>
             </div>
