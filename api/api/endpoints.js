@@ -23,6 +23,7 @@ router.get('/sample/id', function(req, res, next){
 
 // POST for fetching next sample id
 router.post('/sample/id', function (req, res, next) {
+  id++;
   if (id > 9999) {
     id = 1;
   }
@@ -31,7 +32,6 @@ router.post('/sample/id', function (req, res, next) {
     thisId = '0' + thisId;
   }
   res.json({status: 200, response: {id: thisId}});
-  id++;
 });
 
 
@@ -216,7 +216,7 @@ router.get('/data/dash/temp', function (req, res, next) {
 router.get('/data/dash/humid', function (req, res, next) {
   var averageHumids = [];
   for (var i = 0; i < 50; i++) {
-    averageTemps.push(randomWithRange(55, 85));
+    averageHumids.push(randomWithRange(55, 85));
   }
   return res.json({status: 200, response: {temps: averageHumids}})
 

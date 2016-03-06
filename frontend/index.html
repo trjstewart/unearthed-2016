@@ -8,13 +8,13 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
     <script src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBNpxqu91P9CqiTOufR6xyoinSJrf7EMqs"></script>
+    <script src="js/bootstrap.min.js" type="text/javascript"></script>
     <script type="text/javascript">
         var APIUrl = "http://ec2-54-206-19-157.ap-southeast-2.compute.amazonaws.com:3000/api/";
 
-
         //Longitude and Langitude
         var LongLat = {
-            generateType: function (Long) {
+            generateType: function(Long) {
                 var long = typeof Long !== 'undefined' || false ? 2 : 1;
                 var num = (Math.random() * (90 * long)).toFixed(3);
                 if (Math.floor(Math.random()) == 0) {
@@ -22,29 +22,49 @@
                 }
                 return num;
             },
-            generate: function () {
-                return [this.generateType(), this.generateType(true)]
+            generate: function(){
+                return [this.generateType(),this.generateType(true)]
             }
         };
 
         //Sample List
         var SampleList = {
             Template: "",
-            getId: function (callback) {
+            StartingID: 0,
+            FoundSample: false,
+            init: function(){
+                this.Template = $("#Sample_Form_List group").clone();
+                $("#Sample_Form_List group").remove();
+                this.getId(function(data){
+                    window.SampleList.StartingID = data.id;
+                });
+            },
+            getId: function(callback){
                 $.ajax({
                     url: APIUrl + "sample/id",
-                }).done(function (url) {
-                    if (url.status == 200) {
+                }).done(function(url) {
+                    if(url.status == 200) {
                         return callback(url.response);
                     }
-                    return false;
-                }).error(function () {
+                }).error(function(){
                     return false;
                 });
             },
-            setMostRecent: function () {
-                this.getId(function (data) {
-                    if (data !== false) {
+            CheckNewId: function(){
+                this.getId(function(response){
+                    console.log(response.id);
+                    if(response.id!=window.SampleList.StartingID) {
+                        window.SampleList.StartingID = response.id;
+                        window.SampleList.StartingID;
+                        window.SampleList.FoundSample = true;
+                    } else {
+                        return false;
+                    }
+                });
+            },
+            setMostRecent: function() {
+                this.getId(function(data){
+                    if(data !== false){
                         $("#Sample_Form_List group:last-child input[ajax_name='id']").val(data.id);
                         $("#Sample_Form_List group:last-child input[ajax_name='location']").val(LongLat.generate().join(","));
                     } else {
@@ -52,15 +72,15 @@
                     }
                 });
             },
-            data: function () {
-                var Data = {};
-                Data.Samples = [];
-                $("#add-barrel *:not(.Samples_Form) input").each(function () {
+            data: function(){
+                var Data = {Samples: []};
+
+                $("#add-barrel *:not(.Samples_Form) input").each(function(){
                     Data[$(this).attr("name")] = $(this).val();
                 });
-                $("#Sample_Form_List group").each(function () {
+                $("#Sample_Form_List group").each(function(){
                     var SampleData = {};
-                    $("#Sample_Form_List group input").each(function () {
+                    $("#Sample_Form_List group input").each(function(){
                         SampleData[$(this).attr("ajax_name")] = $(this).val();
                     });
                     Data.Samples.push(SampleData);
@@ -74,31 +94,58 @@
         function changePage(page, barrelId) {
             barrelId = barrelId || null;
             $(".page").removeClass("active");
-            var newPage = $(".page[page_id='" + page + "']");
+            var newPage = $(".page[page_id='"+page+"']");
             newPage.addClass("active");
-            switch (page) {
+            switch (page){
                 case 1:
                     newPage.find('#barrel-id').text(barrelId);
                     break;
             }
         }
 
-        $(document).ready(function () {
-            SampleList.Template = $("#Sample_Form_List group").clone();
-            SampleList.setMostRecent();
+        function loadBarrelData(id){
+            $("#accordion").text('');
+            $.get(APIUrl + 'drum/' + id, {}, function(data){
+                if (data.status == 200){
+                    //$('.barrel-content').text(data.response);
+                    $.each(data.response.drum.info.samples, function(index, sample){
+                        var id = sample.sampleId;
+                        var depth = sample.depth;
+                        var timeDug = sample.timeDug;
+                        var boreHole = sample.borehole;
+                        var newElement = $('.sample-template').clone();
+                        newElement.removeClass('sample-template');
+                        newElement.find('.barrel-sample-id').text('Sample ' + id);
+                        newElement.find('.depth-from').text(depth[0]);
+                        newElement.find('.depth-to').text(depth[1]);
+                        //newElement.find('.sample-content').text(timeDug + boreHole);
+                        newElement.show();
+                        $('#accordion').append(newElement);
+                    })
+                } else {
+                    $('.barrel-content').text(data.response.message);
+                }
+            });
+        }
 
-            $.get(APIUrl + 'drum/all', {}, function (drums) {
-                $.each(drums, function (index, drum) {
+        $(document).ready(function() {
+            SampleList.init();
+
+            $.get(APIUrl + 'drum/all', {},function(drums){
+                $.each(drums,function(index,drum){
                     $(".barrel-select").append("<li data-id='" + drum + "'><a href=\"#\">" + drum + "</a></li>")
                 });
             });
 
-            $('.barrel-select').on("click", 'li', function (e) {
+            $('.barrel-select').on("click", 'li', function(e){
                 changePage(1, $(this).data('id'));
+                loadBarrelData($(this).data('id'));
             });
 
-            dashLoad();
-            initMap();
+            $(document).on('click', '.panel-heading', function(e){
+                var collapse = $(this).next('.panel-collapse');
+                collapse.slideToggle();
+            });
         });
 
         $("#SamplesForm_Submit").click(function () {
@@ -107,8 +154,18 @@
 
         //Interaction Functions
         function SampleForm_AddSample() {
-            $("#Sample_Form_List").append($(SampleList.Template).clone());
-            SampleList.setMostRecent();
+            $('#TurnSample').modal('show');
+
+            var SampleID = setInterval(function(){
+                SampleList.CheckNewId();
+                if (SampleList.FoundSample) {
+                    $("#Sample_Form_List").append($(SampleList.Template).clone());
+                    SampleList.setMostRecent();
+                    $('#TurnSample').modal('hide');
+                    clearInterval(SampleID);
+                    SampleList.FoundSample = false;
+                }
+            }, 500);
         }
 
         function SampleForm_RemoveSample() {
@@ -345,84 +402,141 @@
             </div>
         </div>
 
-        <div page_id="1" id="ViewBarrel" class="page content-wrapper">
-            <div class="content-header">
+            <div page_id="1" id="ViewBarrel" class="page content-wrapper">
+                <div class="content-header">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-xs-1">
+                                <a href="#">
+                                    <i class="back glyphicon glyphicon-circle-arrow-left"></i>
+                                </a>
+                            </div>
+                            <div class="col-xs-11">
+                                <h4 class="barrel-title"><b>Barrel ID:</b> <span id="barrel-id"></span></h4>
+                            </div>
+                         </div>
+                    </div>
+                </div>
                 <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-xs-1">
-                            <a href="#">
-                                <i class="back glyphicon glyphicon-circle-arrow-left"></i>
-                            </a>
+                    <div class="row barrel-graphs">
+                        <div class="col-sm-12 col-md-3">
+                            Time In Transit
                         </div>
-                        <div class="col-xs-11">
-                            <h4 class="barrel-title"><b>Barrel ID:</b> <span id="barrel-id"></span></h4>
+                        <div class="col-sm-12 col-md-3">
+                            Humidity Graph
+                        </div>
+                        <div class="col-sm-12 col-md-3">
+                            Temperature Graph
+                        </div>
+                        <div class="col-sm-12 col-md-3">
+                            Location Graph
+                        </div>
+                    </div>
+                    <div class="row barrel-samples">
+                        <div class="panel panel-default sample-template" style="display: none;">
+                            <div class="panel-heading" role="tab" id="headingOne">
+                                <h4 class="panel-title">
+                                    <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                        <span class="barrel-sample-id"></span>
+                                    </a>
+                                </h4>
+                            </div>
+                            <div id="collapseOne" style="display: none;" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                                <div class="panel-body sample-content">
+                                    <div class="row">
+                                        <h5>Depth of Sample</h5>
+                                        From: <span class="depth-from"></span>
+                                        To: <span class="depth-to"></span>
+                                    </div>
+                                    <div class="row">
+                                        <h5>Depth of Sample</h5>
+                                        From: <span class="depth-from"></span>
+                                        To: <span class="depth-to"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div page_id="2" id="NewBarrel" class="page content-wrapper">
-            <form id="add-barrel" action="" method="POST">
-                <h4>New Barrel</h4>
-                <label for="drumId">Drum ID</label><input id="drumId" name="drumID" type="text" maxlength="6">
-                <div class="row">
-                    <div class="col-xs-12">
-                        <label>Place</label>
-                        <input name="drumPlace" value="" type="text" placeholder="e.g. Bore Location">
+            <div page_id="2" id="NewBarrel" class="page content-wrapper">
+                <form id="add-barrel" action="" method="POST">
+                    <h4>New Barrel</h4>
+                    <label for="drumId">Drum ID</label><input id="drumId" name="drumID" type="text" maxlength="6">
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <label>Place</label>
+                            <input name="drumPlace" value="" type="text" placeholder="e.g. Bore Location">
+                        </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-6">
-                        <label>Time</label>
-                        <input name="drumTime" value="" type="text" placeholder="i.e. The time core was removed">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <label>Time</label>
+                            <input name="drumTime" value="" type="text" placeholder="i.e. The time core was removed">
+                        </div>
+                        <div class="col-sm-6">
+                            <label>Dispatched By</label>
+                            <input name="drumDispatcher" value="" type="text" placeholder="e.g. John Smith">
+                        </div>
                     </div>
-                    <div class="col-sm-6">
-                        <label>Dispatched By</label>
-                        <input name="drumDispatcher" value="" type="text" placeholder="e.g. John Smith">
-                    </div>
-                </div>
-                <div id="Samples_Form" class="row">
-                    <div class="col-xs-12">
-                        <div class="row">
-                            <div class="col-xs-6">
-                                <h5>Samples</h5>
+                    <div id="Samples_Form" class="row">
+                        <div class="col-xs-12">
+                            <div class="row">
+                                <div class="col-xs-6">
+                                    <h5>Samples</h5>
+                                </div>
+                                <div class="col-xs-6">
+                                    <div class="Sample_Form_Controls">
+                                        <a class="btn btn-success" onclick="SampleForm_AddSample()">+</a>
+                                        <a class="btn btn-danger" onclick="SampleForm_RemoveSample()">-</a>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-xs-6">
-                                <div class="Sample_Form_Controls">
-                                    <a class="btn btn-success" onclick="SampleForm_AddSample()">+</a>
-                                    <a class="btn btn-danger" onclick="SampleForm_RemoveSample()">-</a>
+                            <div class="row">
+                                <div id="Sample_Form_List" class="col-xs-12">
+                                    <group class="row">
+                                        <div class="col-sm-2">
+                                            <input ajax_name="id" type="text" disabled placeholder="" value="">
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <input ajax_name="depth_min" type="text" placeholder="Depth Min" value="">
+                                        </div>
+                                        <div class="col-sm-2">
+                                            <input ajax_name="depth_max" type="text" placeholder="Depth Max" value="">
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <input ajax_name="time_dug" type="text" placeholder="Time Dug" value="">
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <input ajax_name="location" type="text" placeholder="Location" value="">
+                                        </div>
+                                    </group>
                                 </div>
                             </div>
                         </div>
-                        <div class="row">
-                            <div id="Sample_Form_List" class="col-xs-12">
-                                <group class="row">
-                                    <div class="col-sm-2">
-                                        <input ajax_name="id" type="text" disabled placeholder="" value="">
-                                    </div>
-                                    <div class="col-sm-2">
-                                        <input ajax_name="depth_min" type="text" placeholder="Depth Min" value="">
-                                    </div>
-                                    <div class="col-sm-2">
-                                        <input ajax_name="depth_max" type="text" placeholder="Depth Max" value="">
-                                    </div>
-                                    <div class="col-sm-3">
-                                        <input ajax_name="time_dug" type="text" placeholder="Time Dug" value="">
-                                    </div>
-                                    <div class="col-sm-3">
-                                        <input ajax_name="location" type="text" placeholder="Location" value="">
-                                    </div>
-                                </group>
-                            </div>
-                        </div>
                     </div>
-                </div>
-                <input id="SamplesForm_Submit" onclick="SampleForm_Submit" type="button"
-                       value="Submit Barrel with Samples">
-            </form>
+                    <input id="SamplesForm_Submit" onclick="SampleForm_Submit()" type="button" value="Submit Barrel with Samples">
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
+    <!-- Modal -->
+    <div class="modal fade" id="TurnSample" tabindex="-1" role="dialog" aria-labelledby="TurnSample">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Please Turn on the Sample tracker</h4>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
