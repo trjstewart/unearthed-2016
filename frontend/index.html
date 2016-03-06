@@ -12,21 +12,6 @@
     <script type="text/javascript">
         var APIUrl = "http://ec2-54-206-19-157.ap-southeast-2.compute.amazonaws.com:3000/api/";
 
-        //Longitude and Langitude
-        var LongLat = {
-            generateType: function(Long) {
-                var long = typeof Long !== 'undefined' || false ? 2 : 1;
-                var num = (Math.random() * (90 * long)).toFixed(3);
-                if (Math.floor(Math.random()) == 0) {
-                    num = num * -1; //Gotta get those negative values
-                }
-                return num;
-            },
-            generate: function(){
-                return [this.generateType(),this.generateType(true)]
-            }
-        };
-
         //Sample List
         var SampleList = {
             Template: "",
@@ -66,7 +51,6 @@
                 this.getId(function(data){
                     if(data !== false){
                         $("#Sample_Form_List group:last-child input[ajax_name='id']").val(data.id);
-                        $("#Sample_Form_List group:last-child input[ajax_name='location']").val(LongLat.generate().join(","));
                     } else {
                         console.log("Get Sample ID Failed");
                     }
@@ -74,15 +58,14 @@
             },
             data: function(){
                 var Data = {Samples: []};
-
-                $("#add-barrel *:not(.Samples_Form) input").each(function(){
-                    Data[$(this).attr("name")] = $(this).val();
-                });
+                Data.drumId = $('#drumId').val();
+                Data.dispatcher = $('input[name="dispatcher"]').val();
                 $("#Sample_Form_List group").each(function(){
                     var SampleData = {};
-                    $("#Sample_Form_List group input").each(function(){
-                        SampleData[$(this).attr("ajax_name")] = $(this).val();
-                    });
+                    var sample = $(this);
+                    SampleData.depth = [sample.find('.depth-from').val(), sample.find('.depth-to').val()];
+                    SampleData.borehole = sample.find('.borehole').val();
+                    SampleData.timeDug = sample.find('.time-dug').val();
                     Data.Samples.push(SampleData);
                 });
                 return Data;
@@ -103,6 +86,38 @@
             }
         }
 
+        function parseTime(diff) {
+            elapsed = diff++;
+            seconds = elapsed % 60;
+            elapsed -= seconds;
+            elapsed /= 60;
+            minutes = elapsed % 60;
+            elapsed -= minutes;
+            elapsed /= 60;
+            hours = elapsed % 24;
+            elapsed -= hours;
+            elapsed /= 24;
+            days = elapsed;
+
+            // don't display the time section if it doesn't exist
+            var timeString = '';
+            if (days) {
+                timeString += days + 'd ';
+            }
+            if (hours) {
+                timeString += hours + 'h ';
+            }
+            if (minutes) {
+                timeString += minutes + 'm '
+            }
+            if (seconds) {
+                timeString += seconds + 's '
+            }
+
+
+            return timeString;
+        }
+
         function loadBarrelData(id){
             $("#accordion").text('');
             $.get(APIUrl + 'drum/' + id, {}, function(data){
@@ -112,13 +127,22 @@
                         var id = sample.sampleId;
                         var depth = sample.depth;
                         var timeDug = sample.timeDug;
+                        timeDug = new Date(timeDug);
+                        console.log(timeDug);
+                        var now = (new Date());
+                        console.log('now is ' + now.getTime());
+                        console.log('then was ' + timeDug.getTime());
+                        var relDate = now.getTime() - timeDug.getTime();
+                        relDate = Math.floor(relDate / 1000);
+                        console.log(relDate);
                         var boreHole = sample.borehole;
                         var newElement = $('.sample-template').clone();
                         newElement.removeClass('sample-template');
                         newElement.find('.barrel-sample-id').text('Sample ' + id);
                         newElement.find('.depth-from').text(depth[0]);
                         newElement.find('.depth-to').text(depth[1]);
-                        //newElement.find('.sample-content').text(timeDug + boreHole);
+                        newElement.find('.actual').text(timeDug.toLocaleString());
+                        newElement.find('.relative').text(parseTime(relDate));
                         newElement.show();
                         $('#accordion').append(newElement);
                     })
@@ -132,7 +156,7 @@
             SampleList.init();
 
             $.get(APIUrl + 'drum/all', {},function(drums){
-                $.each(drums,function(index,drum){
+                $.each(drums.response,function(index,drum){
                     $(".barrel-select").append("<li data-id='" + drum + "'><a href=\"#\">" + drum + "</a></li>")
                 });
             });
@@ -144,7 +168,15 @@
 
             $(document).on('click', '.panel-heading', function(e){
                 var collapse = $(this).next('.panel-collapse');
-                collapse.slideToggle();
+                if (collapse.hasClass('in')){
+                    collapse.removeClass('in');
+                    collapse.slideToggle();
+                } else {
+                    $('.panel-collapse').removeClass('in').slideUp();
+                    collapse.slideToggle();
+                    collapse.addClass('in');
+                }
+
             });
 
             dashLoad();
@@ -423,7 +455,7 @@
                 <div class="container-fluid">
                     <div class="row barrel-graphs">
                         <div class="col-sm-12 col-md-3">
-                            Time In Transit
+
                         </div>
                         <div class="col-sm-12 col-md-3">
                             Humidity Graph
@@ -445,16 +477,16 @@
                                 </h4>
                             </div>
                             <div id="collapseOne" style="display: none;" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
-                                <div class="panel-body sample-content">
+                                <div class="panel-body sample-content" style="padding-left: 10%;">
                                     <div class="row">
-                                        <h5>Depth of Sample</h5>
-                                        From: <span class="depth-from"></span>
-                                        To: <span class="depth-to"></span>
+                                        <h4>Depth of Sample</h4>
+                                        <b>From:</b> <span class="depth-from"></span>m
+                                        <b>To:</b> <span class="depth-to"></span>m
                                     </div>
                                     <div class="row">
-                                        <h5>Depth of Sample</h5>
-                                        From: <span class="depth-from"></span>
-                                        To: <span class="depth-to"></span>
+                                        <h4>Time Dug</h4>
+                                        <span class="actual"></span><br>
+                                        <span class="relative"></span> ago.
                                     </div>
                                 </div>
                             </div>
@@ -468,21 +500,11 @@
             <div page_id="2" id="NewBarrel" class="page content-wrapper">
                 <form id="add-barrel" action="" method="POST">
                     <h4>New Barrel</h4>
-                    <label for="drumId">Drum ID</label><input id="drumId" name="drumID" type="text" maxlength="6">
+                    <label for="drumId">Drum ID</label><input id="drumId" name="drumId" type="text" maxlength="6">
                     <div class="row">
-                        <div class="col-xs-12">
-                            <label>Place</label>
-                            <input name="drumPlace" value="" type="text" placeholder="e.g. Bore Location">
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <label>Time</label>
-                            <input name="drumTime" value="" type="text" placeholder="i.e. The time core was removed">
-                        </div>
                         <div class="col-sm-6">
                             <label>Dispatched By</label>
-                            <input name="drumDispatcher" value="" type="text" placeholder="e.g. John Smith">
+                            <input name="dispatcher" value="" type="text" placeholder="e.g. John Smith">
                         </div>
                     </div>
                     <div id="Samples_Form" class="row">
@@ -505,16 +527,16 @@
                                             <input ajax_name="id" type="text" disabled placeholder="" value="">
                                         </div>
                                         <div class="col-sm-2">
-                                            <input ajax_name="depth_min" type="text" placeholder="Depth Min" value="">
+                                            <input ajax_name="depth_min" class="depth-from" type="text" placeholder="Depth Min" value="">
                                         </div>
                                         <div class="col-sm-2">
-                                            <input ajax_name="depth_max" type="text" placeholder="Depth Max" value="">
+                                            <input ajax_name="depth_max" class="depth-to" type="text" placeholder="Depth Max" value="">
                                         </div>
                                         <div class="col-sm-3">
-                                            <input ajax_name="time_dug" type="text" placeholder="Time Dug" value="">
+                                            <input ajax_name="time_dug" class="time-dug" type="text" placeholder="Time Dug" value="">
                                         </div>
                                         <div class="col-sm-3">
-                                            <input ajax_name="location" type="text" placeholder="Location" value="">
+                                            <input ajax_name="borehole" class="borehole" type="text" placeholder="Borehole" value="">
                                         </div>
                                     </group>
                                 </div>
