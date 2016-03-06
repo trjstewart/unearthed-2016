@@ -23,6 +23,7 @@ router.get('/sample/id', function(req, res, next){
 
 // POST for fetching next sample id
 router.post('/sample/id', function (req, res, next) {
+  id++;
   if (id > 9999) {
     id = 1;
   }
@@ -31,7 +32,6 @@ router.post('/sample/id', function (req, res, next) {
     thisId = '0' + thisId;
   }
   res.json({status: 200, response: {id: thisId}});
-  id++;
 });
 
 
