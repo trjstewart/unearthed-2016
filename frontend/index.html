@@ -30,10 +30,13 @@
         var SampleList = {
             Template: "",
             StartingID: 0,
+            FoundSample: false,
             init: function(){
                 this.Template = $("#Sample_Form_List group").clone();
-                this.setMostRecent();
-                this.StartingID = this.getId();
+                $("#Sample_Form_List group").remove();
+                this.getId(function(data){
+                    window.SampleList.StartingID = data.id;
+                });
             },
             getId: function(callback){
                 $.ajax({
@@ -42,17 +45,21 @@
                     if(url.status == 200) {
                         return callback(url.response);
                     }
-                    return false;
                 }).error(function(){
                     return false;
                 });
             },
             CheckNewId: function(){
-                return this.getId(function(response){
-                    if(response.id>this.StartingID){
-                        this.StartingID = response.id;
+                this.getId(function(response){
+                    console.log(response.id);
+                    if(response.id!=window.SampleList.StartingID) {
+                        console.log(response.id, window.SampleList.StartingID);
+                        window.SampleList.StartingID = response.id;
+                        window.SampleList.StartingID;
+                        window.SampleList.FoundSample = true;
+                    } else {
+                        return false;
                     }
-                    return false
                 });
             },
             setMostRecent: function() {
@@ -188,7 +195,6 @@
                 }
 
             });
-
         });
 
         $("#SamplesForm_Submit").click(function(){
@@ -198,11 +204,16 @@
         //Interaction Functions
         function SampleForm_AddSample() {
             $('#TurnSample').modal('show');
-            var SampleID = setInterval(SampleList.CheckNewId(), 500);
-            if (SampleID !== false) {
-                $("#Sample_Form_List").append($(SampleList.Template).clone());
-                SampleList.setMostRecent();
-            }
+            var SampleID = setInterval(function(){
+                SampleList.CheckNewId();
+                if (SampleList.FoundSample) {
+                    $("#Sample_Form_List").append($(SampleList.Template).clone());
+                    SampleList.setMostRecent();
+                    $('#TurnSample').modal('hide');
+                    clearInterval(SampleID);
+                    SampleList.FoundSample = false;
+                }
+            }, 500);
         }
 
         function SampleForm_RemoveSample(){
