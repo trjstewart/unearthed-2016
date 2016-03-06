@@ -207,13 +207,12 @@
         }
 
         function SampleForm_Submit() {
-            $.post(APIUrl + 'drum/start/' + $('#drumId').val(),
-                SampleList.data(),
-                    function(message){
-                        console.log(message);
-                    }
-            );
+            var url = APIUrl + 'drum/start/' + $('#drumId').val();
+            console.log(url);
+            var data = SampleList.data();
+            $.post(url, data, function(message){ console.log(message); });
         }
+
 
         function getRandData(type, callback) {
             var min, max;
