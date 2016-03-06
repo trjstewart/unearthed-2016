@@ -37,7 +37,6 @@
             },
             CheckNewId: function(){
                 this.getId(function(response){
-                    console.log(response.id);
                     if(response.id!=window.SampleList.StartingID) {
                         window.SampleList.StartingID = response.id;
                         window.SampleList.StartingID;
@@ -127,13 +126,9 @@
                         var depth = sample.depth;
                         var timeDug = sample.timeDug;
                         timeDug = new Date(timeDug);
-                        console.log(timeDug);
                         var now = (new Date());
-                        console.log('now is ' + now.getTime());
-                        console.log('then was ' + timeDug.getTime());
                         var relDate = now.getTime() - timeDug.getTime();
                         relDate = Math.floor(relDate / 1000);
-                        console.log(relDate);
                         var boreHole = sample.borehole;
                         var newElement = $('.sample-template').clone();
                         newElement.removeClass('sample-template');
@@ -182,8 +177,9 @@
 
             });
 
-            $(document).on('click', '.panel-heading', function(e){
-//                $("#barrel-nav-item").;
+            $(document).on('click', '.barrel-nav-item', function(e){
+                $(".barrel-nav-item").removeClass("active");
+                $(this).addClass("active");
             });
 
             dashLoad();
@@ -204,6 +200,10 @@
                     SampleList.FoundSample = false;
                 }
             }, 500);
+
+            setInterval(function(){
+                BarrelNav();
+            },1000);
         }
 
         function SampleForm_RemoveSample() {
@@ -212,16 +212,13 @@
 
         function SampleForm_Submit() {
             var URLRef = APIUrl + 'drum/start/' + $('#drumId').val();
-            console.log(url);
-            var data = SampleList.data();
-            console.log(data);
-            //$.post(url, data, function(message){ console.log(message); });
+            var SampleData = SampleList.data();
             $.ajax({
                 url: URLRef,
+                type: "POST",
+                data: SampleData
             }).done(function(data) {
                 console.log(data)
-            }).error(function(){
-                return false;
             });
         }
 
