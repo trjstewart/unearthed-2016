@@ -62,7 +62,7 @@
                 $("#Sample_Form_List group").each(function(){
                     var SampleData = {};
                     var sample = $(this);
-                    SampleData.sampleId = sample.find('.id');
+                    SampleData.sampleId = sample.find('.id').val();
                     SampleData.depth = [sample.find('.depth-from').val(), sample.find('.depth-to').val()];
                     SampleData.borehole = sample.find('.borehole').val();
                     SampleData.timeDug = sample.find('.time-dug').val();
@@ -183,13 +183,11 @@
             });
 
             $(document).on('click', '.panel-heading', function(e){
+//                $("#barrel-nav-item").;
+            });
 
             dashLoad();
             initMap();
-        });
-
-        $("#SamplesForm_Submit").click(function () {
-            console.log(SampleList.data);
         });
 
         //Interaction Functions
@@ -213,10 +211,18 @@
         }
 
         function SampleForm_Submit() {
-            var url = APIUrl + 'drum/start/' + $('#drumId').val();
+            var URLRef = APIUrl + 'drum/start/' + $('#drumId').val();
             console.log(url);
             var data = SampleList.data();
-            $.post(url, data, function(message){ console.log(message); });
+            console.log(data);
+            //$.post(url, data, function(message){ console.log(message); });
+            $.ajax({
+                url: URLRef,
+            }).done(function(data) {
+                console.log(data)
+            }).error(function(){
+                return false;
+            });
         }
 
 
