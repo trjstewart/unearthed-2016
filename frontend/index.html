@@ -57,19 +57,18 @@
                 });
             },
             data: function(){
-                var Data = {Samples: []};
-                Data.drumId = $('#drumId').val();
+                var Data = {samples: []};
                 Data.dispatcher = $('input[name="dispatcher"]').val();
                 $("#Sample_Form_List group").each(function(){
                     var SampleData = {};
                     var sample = $(this);
+                    SampleData.sampleId = sample.find('.id');
                     SampleData.depth = [sample.find('.depth-from').val(), sample.find('.depth-to').val()];
                     SampleData.borehole = sample.find('.borehole').val();
                     SampleData.timeDug = sample.find('.time-dug').val();
-                    Data.Samples.push(SampleData);
+                    Data.samples.push(SampleData);
                 });
                 return Data;
-                return JSON.stringify(Data);
             }
         };
 
@@ -205,7 +204,12 @@
         }
 
         function SampleForm_Submit() {
-            console.log(SampleList.data());
+            $.post(APIUrl + 'drum/start/' + $('#drumId').val(),
+                SampleList.data(),
+                    function(message){
+                        console.log(message);
+                    }
+            );
         }
 
         function getRandData(type, callback) {
@@ -521,7 +525,7 @@
                                 <div id="Sample_Form_List" class="col-xs-12">
                                     <group class="row">
                                         <div class="col-sm-2">
-                                            <input ajax_name="id" type="text" disabled placeholder="" value="">
+                                            <input ajax_name="id" class="id" type="text" disabled placeholder="" value="">
                                         </div>
                                         <div class="col-sm-2">
                                             <input ajax_name="depth_min" class="depth-from" type="text" placeholder="Depth Min" value="">
