@@ -53,7 +53,6 @@
                 this.getId(function(response){
                     console.log(response.id);
                     if(response.id!=window.SampleList.StartingID) {
-                        console.log(response.id, window.SampleList.StartingID);
                         window.SampleList.StartingID = response.id;
                         window.SampleList.StartingID;
                         window.SampleList.FoundSample = true;
@@ -154,6 +153,7 @@
         //Interaction Functions
         function SampleForm_AddSample() {
             $('#TurnSample').modal('show');
+
             var SampleID = setInterval(function(){
                 SampleList.CheckNewId();
                 if (SampleList.FoundSample) {
@@ -316,7 +316,7 @@
                             </div>
                         </div>
                     </div>
-                    <input id="SamplesForm_Submit" onclick="SampleForm_Submit" type="button" value="Submit Barrel with Samples">
+                    <input id="SamplesForm_Submit" onclick="SampleForm_Submit()" type="button" value="Submit Barrel with Samples">
                 </form>
             </div>
         </div>
