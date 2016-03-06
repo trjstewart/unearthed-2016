@@ -83,6 +83,7 @@
                     newPage.find('#barrel-id').text(barrelId);
                     break;
             }
+            updateLiveData();
         }
 
         function parseTime(diff) {
@@ -170,6 +171,9 @@
             });
             dashLoad();
             initMap();
+
+            setInterval(updateLiveData, 5000);
+            updateLiveData();
         });
 
             $(document).on('click', '.panel-heading', function (e) {
@@ -357,6 +361,24 @@
                 });
             }
 
+            function updateLiveData() {
+                // get id
+                var id = $('#barrel-id').html();
+                if (id != undefined && id != "") {
+                    $.get(APIUrl + 'drum/' + id, function(data) {
+                        var temp = data.response.drum.info.trackingData.temp[data.response.drum.info.trackingData.temp.length - 1];
+                        var humid = data.response.drum.info.trackingData.humidity[data.response.drum.info.trackingData.humidity.length - 1];
+                        var location = data.response.inf0.location[data.response.inf0.location.length - 1][0] + ' -';
+                        location += data.response.inf0.location[data.response.inf0.location.length - 1][1];
+
+                        $('#live-temp').html(temp + ' degrees C');
+                        $('#live-humid').html(humid + ' %');
+                        $('#live-location').html(location);
+                    });
+                }
+
+            }
+
             function initMap() {
 
                     // get number of barrels to add to page
@@ -364,21 +386,22 @@
                     $.when($.get(APIUrl + 'drum/all')
                     ).done(function (data) {
                         var drums = data.response;
-
-                        drums.forEach(function (drum) {
-                            $.get(APIUrl + 'drum/' + drum, function (data) {
-                                if (data.response.inf0.location.length > 0) {
-                                    var marker = new google.maps.Marker({
-                                        position: {
-                                            lat: Number(data.response.inf0.location[0][0]),
-                                            lng: Number(data.response.inf0.location[0][1])
-                                        },
-                                        title: ""
-                                    });
-                                    marker.setMap(map);
-                                }
+                        if (drums) {
+                            drums.forEach(function (drum) {
+                                $.get(APIUrl + 'drum/' + drum, function (data) {
+                                    if (data.response.inf0.location.length > 0) {
+                                        var marker = new google.maps.Marker({
+                                            position: {
+                                                lat: Number(data.response.inf0.location[0][0]),
+                                                lng: Number(data.response.inf0.location[0][1])
+                                            },
+                                            title: ""
+                                        });
+                                        marker.setMap(map);
+                                    }
+                                });
                             });
-                        });
+                        }
 
                         // Specify features and elements to define styles.
                         var styleArray = [
@@ -445,10 +468,12 @@
             <div class="content-header">
                 <div class="container-fluid">
                     <div class="row">
-                        <div class="col-xs-6 time-container" style="padding-left: 20px">
-                            <div id="time"></div>
-                            <div class="time-title">
-                                Average Trip Time
+                        <div class="col-xs-6 " style="padding: 3%; box-sizing: border-box">
+                            <div class="time-container">
+                                <div id="time"></div>
+                                <div class="time-title">
+                                    Average Trip Time
+                                </div>
                             </div>
                         </div>
                         <div class="col-xs-6">
@@ -493,14 +518,17 @@
                         <div class="col-sm-12 col-md-3">
 
                         </div>
-                        <div class="col-sm-12 col-md-3">
-                            Humidity Graph
+                        <div class="col-sm-12 col-md-3" style="text-align: center">
+                            Latest Humidity
+                            <div id="live-humid"></div>
                         </div>
-                        <div class="col-sm-12 col-md-3">
-                            Temperature Graph
+                        <div class="col-sm-12 col-md-3" style="text-align: center">
+                            Latest Temperature
+                            <div id="live-temp"></div>
                         </div>
-                        <div class="col-sm-12 col-md-3">
-                            Location Graph
+                        <div class="col-sm-12 col-md-3" style="text-align: center">
+                            Latest Location
+                            <div id="live-location"></div>
                         </div>
                     </div>
                     <div class="row barrel-samples">
