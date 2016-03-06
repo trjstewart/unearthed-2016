@@ -164,14 +164,17 @@
             SampleList.init();
             BarrelNav();
 
-            $('.barrel-select').on("click", 'li', function(e){
+            $('.barrel-select').on("click", 'li', function (e) {
                 changePage(1, $(this).data('id'));
                 loadBarrelData($(this).data('id'));
             });
+            dashLoad();
+            initMap();
+        });
 
-            $(document).on('click', '.panel-heading', function(e){
+            $(document).on('click', '.panel-heading', function (e) {
                 var collapse = $(this).next('.panel-collapse');
-                if (collapse.hasClass('in')){
+                if (collapse.hasClass('in')) {
                     collapse.removeClass('in');
                     collapse.slideToggle();
                 } else {
@@ -182,240 +185,237 @@
 
             });
 
-            $(document).on('click', '.panel-heading', function(e){
-
-            dashLoad();
-            initMap();
-        });
-
-        $("#SamplesForm_Submit").click(function () {
-            console.log(SampleList.data);
-        });
-
-        //Interaction Functions
-        function SampleForm_AddSample() {
-            $('#TurnSample').modal('show');
-
-            var SampleID = setInterval(function(){
-                SampleList.CheckNewId();
-                if (SampleList.FoundSample) {
-                    $("#Sample_Form_List").append($(SampleList.Template).clone());
-                    SampleList.setMostRecent();
-                    $('#TurnSample').modal('hide');
-                    clearInterval(SampleID);
-                    SampleList.FoundSample = false;
-                }
-            }, 500);
-        }
-
-        function SampleForm_RemoveSample() {
-            $("#Sample_Form_List group:last-child").remove();
-        }
-
-        function SampleForm_Submit() {
-            var url = APIUrl + 'drum/start/' + $('#drumId').val();
-            console.log(url);
-            var data = SampleList.data();
-            $.post(url, data, function(message){ console.log(message); });
-        }
+            $(document).on('click', '.panel-heading', function (e) {
 
 
-        function getRandData(type, callback) {
-            var min, max;
-
-            if (type == 'humid') {
-                min = 55;
-                max = 85;
-            } else if (type == 'temp') {
-                min = 25;
-                max = 45;
-            }
-
-            $.get(APIUrl + 'data/dash/random/' + min + '/' + max, function (data) {
-                if (data.status == 200) {
-                    return callback(data.response.random);
-                }
-            });
-        }
-
-
-        // handle the initial load of the dashboard;
-        function dashLoad() {
-
-            $.get(APIUrl + 'data/dash/time', function(data) {
-
-                $('#time').html(parseTime(data.response.averageTime));
             });
 
-            var humidity, temperature;
+            $("#SamplesForm_Submit").click(function () {
+                console.log(SampleList.data);
+            });
 
-            var xArr = [];
-            for (var i = 0; i < 50; i++) {
-                xArr.push(i);
-            }
 
-            $.when(
-                    $.get(APIUrl + 'data/dash/temp'), $.get(APIUrl + 'data/dash/humid')
-            ).done(function (temp, humid) {
-                humidity = humid[0].response.temps;
-                temperature = temp[0].response.temps;
-                var tempArr = [];
-                var humArr = [];
+            //Interaction Functions
+            function SampleForm_AddSample() {
+                $('#TurnSample').modal('show');
 
-                temperature.forEach(function(temp) {
-                    tempArr.push(Number(temp));
-                });
-
-                humidity.forEach(function(humidity) {
-                   humArr.push(Number(humidity)) ;
-                });
-
-                $('#avgTemp').highcharts({
-                    chart: {
-                        type: 'areaspline'
-                    },
-                    title: {
-                        text: 'Average Temperature'
-                    },
-                    yAxis: {
-                        title: {
-                            text: 'Temp'
-                        },
-                        plotLines: [{
-                            value: 0,
-                            width: 1,
-                            color: '#26A69A'
-                        }]
-                    },
-                    credits: {
-                        enabled: false
-                    },
-                    plotOptions: {
-                        areaspline: {
-                            fillOpacity: 0.5
-                        }
-                    },
-                    series: [
-                    {
-                        name: 'Temperature',
-                        data: tempArr
+                var SampleID = setInterval(function () {
+                    SampleList.CheckNewId();
+                    if (SampleList.FoundSample) {
+                        $("#Sample_Form_List").append($(SampleList.Template).clone());
+                        SampleList.setMostRecent();
+                        $('#TurnSample').modal('hide');
+                        clearInterval(SampleID);
+                        SampleList.FoundSample = false;
                     }
-                    ]
+                }, 500);
+            }
+
+            function SampleForm_RemoveSample() {
+                $("#Sample_Form_List group:last-child").remove();
+            }
+
+            function SampleForm_Submit() {
+                var url = APIUrl + 'drum/start/' + $('#drumId').val();
+                console.log(url);
+                var data = SampleList.data();
+                $.post(url, data, function (message) {
+                    console.log(message);
+                });
+            }
+
+
+            function getRandData(type, callback) {
+                var min, max;
+
+                if (type == 'humid') {
+                    min = 55;
+                    max = 85;
+                } else if (type == 'temp') {
+                    min = 25;
+                    max = 45;
+                }
+
+                $.get(APIUrl + 'data/dash/random/' + min + '/' + max, function (data) {
+                    if (data.status == 200) {
+                        return callback(data.response.random);
+                    }
+                });
+            }
+
+
+            // handle the initial load of the dashboard;
+            function dashLoad() {
+
+                $.get(APIUrl + 'data/dash/time', function (data) {
+
+                    $('#time').html(parseTime(data.response.averageTime));
                 });
 
-                $('#avgHumid').highcharts({
-                    chart: {
-                        type: 'areaspline'
-                    },
-                    title: {
-                        text: 'Average Humidity'
-                    },
-                    yAxis: {
-                        title: {
-                            text: 'Temp'
+                var humidity, temperature;
+
+                var xArr = [];
+                for (var i = 0; i < 50; i++) {
+                    xArr.push(i);
+                }
+
+                $.when(
+                        $.get(APIUrl + 'data/dash/temp'), $.get(APIUrl + 'data/dash/humid')
+                ).done(function (temp, humid) {
+                    humidity = humid[0].response.temps;
+                    temperature = temp[0].response.temps;
+                    var tempArr = [];
+                    var humArr = [];
+
+                    temperature.forEach(function (temp) {
+                        tempArr.push(Number(temp));
+                    });
+
+                    humidity.forEach(function (humidity) {
+                        humArr.push(Number(humidity));
+                    });
+
+                    $('#avgTemp').highcharts({
+                        chart: {
+                            type: 'areaspline'
                         },
-                        plotLines: [{
-                            value: 0,
-                            width: 1,
-                            color: '#E53935'
-                        }]
-                    },
-                    credits: {
-                        enabled: false
-                    },
-                    plotOptions: {
-                        areaspline: {
-                            fillOpacity: 0.5
-                        }
-                    },
-                    series: [
-                        {
-                            name: 'Humidity',
-                            data: humArr
-                        }
-                    ]
-                });
-            });
+                        title: {
+                            text: 'Average Temperature'
+                        },
+                        yAxis: {
+                            title: {
+                                text: 'Temp'
+                            },
+                            plotLines: [{
+                                value: 0,
+                                width: 1,
+                                color: '#26A69A'
+                            }]
+                        },
+                        credits: {
+                            enabled: false
+                        },
+                        plotOptions: {
+                            areaspline: {
+                                fillOpacity: 0.5
+                            }
+                        },
+                        series: [
+                            {
+                                name: 'Temperature',
+                                data: tempArr
+                            }
+                        ]
+                    });
 
-            setInterval(addChartPoint, 5000);
-        }
-
-        function addChartPoint() {
-            var tempChart = $('#avgTemp').highcharts();
-            var humidChart = $('#avgHumid').highcharts();
-
-            var temp = getRandData('temp', function(result) {
-                tempChart.series[0].addPoint(Number(result));
-            });
-            var humid = getRandData('humid', function(result) {
-                humidChart.series[0].addPoint(Number(result));
-            });
-        }
-
-        function initMap() {
-
-            // get number of barrels to add to page
-
-            $.when(
-                    $.get(APIUrl + 'drum/all')
-            ).done(function (data) {
-                var drums = data.response;
-
-                drums.forEach(function(drum) {
-                    $.get(APIUrl + 'drum/' +drum, function(data) {
-                        if (data.response.inf0.location.length > 0) {
-                            var marker = new google.maps.Marker({
-                                position: {lat: Number(data.response.inf0.location[0][0]), lng: Number(data.response.inf0.location[0][1])},
-                                title: ""
-                            });
-                            marker.setMap(map);
-                        }
+                    $('#avgHumid').highcharts({
+                        chart: {
+                            type: 'areaspline'
+                        },
+                        title: {
+                            text: 'Average Humidity'
+                        },
+                        yAxis: {
+                            title: {
+                                text: 'Temp'
+                            },
+                            plotLines: [{
+                                value: 0,
+                                width: 1,
+                                color: '#E53935'
+                            }]
+                        },
+                        credits: {
+                            enabled: false
+                        },
+                        plotOptions: {
+                            areaspline: {
+                                fillOpacity: 0.5
+                            }
+                        },
+                        series: [
+                            {
+                                name: 'Humidity',
+                                data: humArr
+                            }
+                        ]
                     });
                 });
 
-                var markers = [];
+                setInterval(addChartPoint, 5000);
+            }
 
+            function addChartPoint() {
+                var tempChart = $('#avgTemp').highcharts();
+                var humidChart = $('#avgHumid').highcharts();
 
-
-
-                // Specify features and elements to define styles.
-                var styleArray = [
-                    {
-                        featureType: "all",
-                        stylers: [
-                            {saturation: -80}
-                        ]
-                    }, {
-                        featureType: "road.arterial",
-                        elementType: "geometry",
-                        stylers: [
-                            {hue: "#00ffee"},
-                            {saturation: 50}
-                        ]
-                    }, {
-                        featureType: "poi.business",
-                        elementType: "labels",
-                        stylers: [
-                            {visibility: "off"}
-                        ]
-                    }
-                ];
-
-                // Create a map object and specify the DOM element for display.
-                var map = new google.maps.Map(document.getElementById('map'), {
-                    center: {lat: -24.994167, lng: 134.866944},
-                    scrollwheel: false,
-                    // Apply the map style array to the map.
-                    styles: styleArray,
-                    zoom: 4
+                var temp = getRandData('temp', function (result) {
+                    tempChart.series[0].addPoint(Number(result));
                 });
+                var humid = getRandData('humid', function (result) {
+                    humidChart.series[0].addPoint(Number(result));
+                });
+            }
+
+            function initMap() {
+
+                    // get number of barrels to add to page
+
+                    $.when($.get(APIUrl + 'drum/all')
+                    ).done(function (data) {
+                        var drums = data.response;
+
+                        drums.forEach(function (drum) {
+                            $.get(APIUrl + 'drum/' + drum, function (data) {
+                                if (data.response.inf0.location.length > 0) {
+                                    var marker = new google.maps.Marker({
+                                        position: {
+                                            lat: Number(data.response.inf0.location[0][0]),
+                                            lng: Number(data.response.inf0.location[0][1])
+                                        },
+                                        title: ""
+                                    });
+                                    marker.setMap(map);
+                                }
+                            });
+                        });
+
+                        // Specify features and elements to define styles.
+                        var styleArray = [
+                            {
+                                featureType: "all",
+                                stylers: [
+                                    {saturation: -80}
+                                ]
+                            }, {
+                                featureType: "road.arterial",
+                                elementType: "geometry",
+                                stylers: [
+                                    {hue: "#00ffee"},
+                                    {saturation: 50}
+                                ]
+                            }, {
+                                featureType: "poi.business",
+                                elementType: "labels",
+                                stylers: [
+                                    {visibility: "off"}
+                                ]
+                            }
+                        ];
+
+                        // Create a map object and specify the DOM element for display.
+                        var map = new google.maps.Map(document.getElementById('map'), {
+                            center: {lat: -24.994167, lng: 134.866944},
+                            scrollwheel: false,
+                            // Apply the map style array to the map.
+                            styles: styleArray,
+                            zoom: 4
+                        });
 
 
-
-                $('#map').css('display', 'block');
-            });
+                        $('#map').css('display', 'block');
+                    });
         }
-
 
     </script>
 </head>
@@ -448,7 +448,7 @@
                         <div class="col-xs-6 time-container" style="padding-left: 20px">
                             <div id="time"></div>
                             <div class="time-title">
-                                Average Time
+                                Average Trip Time
                             </div>
                         </div>
                         <div class="col-xs-6">
