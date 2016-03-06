@@ -57,11 +57,15 @@ body {
     position: relative;
 }
 
-.barrel-select li:hover {
+.barrel-select li a {
+    color:#ddd;
+}
+
+.barrel-select li:hover a{
     color: #FFF;
 }
 
-.barrel-select li.active {
+.barrel-select li.active, .barrel-select li.active a{
     background: #232D31;
     color: #fff;
 }
