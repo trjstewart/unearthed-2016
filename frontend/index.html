@@ -34,8 +34,8 @@
             init: function(){
                 this.Template = $("#Sample_Form_List group").clone();
                 $("#Sample_Form_List group").remove();
-                window.SampleList.StartingID = this.getId(function(data){
-                    return data.id;
+                this.getId(function(data){
+                    window.SampleList.StartingID = data.id;
                 });
             },
             getId: function(callback){
@@ -51,7 +51,9 @@
             },
             CheckNewId: function(){
                 this.getId(function(response){
-                    if(response.id>window.SampleList.StartingID){
+                    console.log(response.id);
+                    if(response.id!=window.SampleList.StartingID) {
+                        console.log(response.id, window.SampleList.StartingID);
                         window.SampleList.StartingID = response.id;
                         window.SampleList.StartingID;
                         window.SampleList.FoundSample = true;
@@ -158,6 +160,7 @@
                     $("#Sample_Form_List").append($(SampleList.Template).clone());
                     SampleList.setMostRecent();
                     $('#TurnSample').modal('hide');
+                    clearInterval(SampleID);
                     SampleList.FoundSample = false;
                 }
             }, 500);
