@@ -142,6 +142,7 @@
         function dashLoad() {
 
             $.get(APIUrl + 'data/dash/time', function(data) {
+
                 $('#time').html(data.response.averageTime);
             });
 
