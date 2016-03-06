@@ -177,6 +177,9 @@
                 }
 
             });
+
+            dashLoad();
+            initMap();
         });
 
         $("#SamplesForm_Submit").click(function () {
@@ -236,7 +239,7 @@
 
             $.get(APIUrl + 'data/dash/time', function(data) {
 
-                $('#time').html(data.response.averageTime);
+                $('#time').html(parseTime(data.response.averageTime));
             });
 
             var humidity, temperature;
@@ -346,39 +349,54 @@
 
         function initMap() {
 
-            // Specify features and elements to define styles.
-            var styleArray = [
-                {
-                    featureType: "all",
-                    stylers: [
-                        { saturation: -80 }
-                    ]
-                },{
-                    featureType: "road.arterial",
-                    elementType: "geometry",
-                    stylers: [
-                        { hue: "#00ffee" },
-                        { saturation: 50 }
-                    ]
-                },{
-                    featureType: "poi.business",
-                    elementType: "labels",
-                    stylers: [
-                        { visibility: "off" }
-                    ]
-                }
-            ];
+            // get number of barrels to add to page
 
-            // Create a map object and specify the DOM element for display.
-            var map = new google.maps.Map(document.getElementById('map'), {
-                center: {lat: -34.397, lng: 150.644},
-                scrollwheel: false,
-                // Apply the map style array to the map.
-                styles: styleArray,
-                zoom: 8
+            $.when(
+                    $.get(APIUrl + 'drum/all'), $.get('locations.js')
+            ).done(function (drums, locations) {
+                var drumNum = drums[0].response.length;
+                var locationArr = locations[0];
+
+                var markers = [];
+
+
+
+
+                // Specify features and elements to define styles.
+                var styleArray = [
+                    {
+                        featureType: "all",
+                        stylers: [
+                            {saturation: -80}
+                        ]
+                    }, {
+                        featureType: "road.arterial",
+                        elementType: "geometry",
+                        stylers: [
+                            {hue: "#00ffee"},
+                            {saturation: 50}
+                        ]
+                    }, {
+                        featureType: "poi.business",
+                        elementType: "labels",
+                        stylers: [
+                            {visibility: "off"}
+                        ]
+                    }
+                ];
+
+                // Create a map object and specify the DOM element for display.
+                var map = new google.maps.Map(document.getElementById('map'), {
+                    center: {lat: -24.994167, lng: 134.866944},
+                    scrollwheel: false,
+                    // Apply the map style array to the map.
+                    styles: styleArray,
+                    zoom: 4
+                });
+
+
+                $('#map').css('display', 'block');
             });
-
-            $('#map').css('display', 'block');
         }
 
 
@@ -443,7 +461,7 @@
                     <div class="container-fluid">
                         <div class="row">
                             <div class="col-xs-1">
-                                <a href="#">
+                                <a onclick="changePage(3)">
                                     <i class="back glyphicon glyphicon-circle-arrow-left"></i>
                                 </a>
                             </div>
@@ -501,8 +519,11 @@
             <div page_id="2" id="NewBarrel" class="page content-wrapper">
                 <form id="add-barrel" action="" method="POST">
                     <h4>New Barrel</h4>
-                    <label for="drumId">Drum ID</label><input id="drumId" name="drumId" type="text" maxlength="6">
                     <div class="row">
+                        <div class="col-sm-6">
+                            <label for="drumId">Drum ID</label>
+                            <input id="drumId" name="drumId" type="text" maxlength="6">
+                        </div>
                         <div class="col-sm-6">
                             <label>Dispatched By</label>
                             <input name="dispatcher" value="" type="text" placeholder="e.g. John Smith">

@@ -57,11 +57,15 @@ body {
     position: relative;
 }
 
-.barrel-select li:hover {
+.barrel-select li a {
+    color:#ddd;
+}
+
+.barrel-select li:hover a{
     color: #FFF;
 }
 
-.barrel-select li.active {
+.barrel-select li.active, .barrel-select li.active a{
     background: #232D31;
     color: #fff;
 }
@@ -199,4 +203,34 @@ body {
 
 group {
     display: block;
+}
+
+#map {
+    height: 350px;
+    margin: 30px;
+}
+.time-container {
+    padding-top: 20px;
+    margin-top: 30px;
+    background: #E0E0E0;
+    height: 350px;
+}
+#time {
+    width: 100%;
+    height: 50%;
+    font-size: 3.7rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    text-align: center;
+    padding-top: 60px;
+}
+.time-title {
+    width: 100%;
+    height: 50%;
+    font-size: 4rem;
+    color: black;
+    text-transform: uppercase;
+    text-align: center;
+    font-weight: 700;
+    padding-top: 20px;
 }
